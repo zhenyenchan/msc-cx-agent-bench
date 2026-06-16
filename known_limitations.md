@@ -13,3 +13,7 @@ This document tracks observed failure modes of the agent during development.
 - The agent does not detect when a question asks for granularity below what the data supports e.g. specific products and companies. 
 - Currently maps the question to the nearest available filter and returns a misleading answer
 - Metric needed to measure whether the answer is grounded in data
+
+## 3. Invalid tool name hallucination
+- The agent sometimes invents a fake function name e.g. "function_name"
+- Metric needed to measure tool validity
