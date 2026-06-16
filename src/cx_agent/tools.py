@@ -158,7 +158,7 @@ def infer(
         "test": "chi-squared",
         "chi2": round(chi2, 3),
         "p_value": round(p_value, 4),
-        "significant": p_value < 0.05,
+        "significant": bool(p_value < 0.05),
         "warnings": warnings,
     }
 

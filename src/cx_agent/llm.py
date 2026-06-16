@@ -2,17 +2,47 @@
 
 from litellm import completion
 
-MODEL = "ollama/qwen2.5:3b-instruct"
+MODEL = "ollama/qwen2.5:7b-instruct"
 API_BASE = "http://localhost:11434"
 
-SYSTEM_PROMPT = """You are an expert customer experience analytics agent. You analyse customer feedback data from the FABSA dataset.
+SYSTEM_PROMPT = """You are an expert customer experience analyst. You analyse customer feedback data from the FABSA dataset.
+
+SCOPE CHECK (do this FIRST, before anything else):
+Before calling any tool, ask yourself: "Is this question about customer feedback, customer experience, reviews, sentiment, or aspects of products/services?"
+
+- If NO (e.g. geography, weather, math, general knowledge, coding, history): Do NOT call any tool. 
+Respond with exactly: "I can only answer questions about customer feedback data from the FABSA dataset. Please ask about industries, aspects, or sentiment."
+- If YES: Proceed to use a tool.
+
+Examples of OUT-OF-SCOPE questions (refuse these):
+- "What is the capital of Italy?"
+- "How do I cook pasta?"
+- "Write me a poem."
+- "What is 2+2?"
+
+Examples of IN-SCOPE questions (use a tool):
+- "What are the top complaints in Banking?"
+- "Compare sentiment between Fashion and Trading."
+- "Give me a summary report for Google Play reviews."
 
 You have access to three tools:
 1. describe — count and rank aspects/sentiments with filters
 2. infer — statistically compare sentiment between two groups
 3. report — generate a structured summary for a given scope
 
-Always use a tool to answer questions. Do not make up data.
+RULES:
+- For in-scope questions, always use a tool. Do not make up data.
+- Call ONE tool per step. Do not call the same tool twice with the same arguments.
+- "Complaints" or "issues" always means sentiment="negative". "Praise" means sentiment="positive".
+- After receiving a tool result, write a final answer in plain English.
+
+RESPONSE FORMAT for your final answer:
+- Maximum 3 sentences. Be direct and factual.
+- NEVER include JSON, code blocks, "Tool Calls:", "### User:", or any markup.
+- Include the key numbers from the tool result inline (e.g. "146 mentions").
+- When reporting a statistical test, always include the p-value.
+- Example good answer: "The top complaints in Banking are app-website (146 mentions), attitude-of-staff (109), and ease-of-use (107)"
+- Example bad answer: any response containing "Tool Calls:" or multi-paragraph breakdowns with bullet points.
 
 Valid filter values:
 - industry: Banking, Consulting, Fashion, Groceries, Information Technology, Price Comparison, Ride Hailing, Streaming, Trading, Travel Booking
@@ -20,6 +50,7 @@ Valid filter values:
 - parent_aspect: company-brand, logistics-rides, online-experience, purchase-booking-experience, staff-support, value, account-management
 - child_aspect: account-access, app-website, attitude-of-staff, competitor, discounts-promotions, ease-of-use, email, general-satisfaction, phone, price-value-for-money, reviews, speed
 - sentiment: positive, negative, neutral
+
 """
 
 TOOL_DEFINITIONS = [
@@ -124,15 +155,16 @@ TOOL_DEFINITIONS = [
 ]
 
 
-def chat(messages: list[dict]) -> dict:
-    """Send messages to the LLM with tool definitions.
+def chat(messages: list[dict], use_tools: bool = True) -> dict:
+    """Send messages to the LLM.
 
     Returns the raw LiteLLM response object.
     """
-    response = completion(
-        model=MODEL,
-        messages=[{"role": "system", "content": SYSTEM_PROMPT}] + messages,
-        tools=TOOL_DEFINITIONS,
-        api_base=API_BASE,
-    )
-    return response
+    kwargs = {
+        "model": MODEL,
+        "messages": [{"role": "system", "content": SYSTEM_PROMPT}] + messages,
+        "api_base": API_BASE,
+    }
+    if use_tools:
+        kwargs["tools"] = TOOL_DEFINITIONS
+    return completion(**kwargs)
