@@ -7,7 +7,33 @@ What I've built:
 - A minimal end-to-end CX analytics agent
 - Dataset: FABSA (10500+ reviews, 12 aspect categories, 3 sentiment classes, 10 industries).
 - LLM: Ollama qwen2.5:7b-instruct
+- Architecture: ReAct from scratch
 - The agent answers 3 types of questions (descriptive, inferential and reporting) by routing them through a small set of tools.
+
+## Architecture
+
+```mermaid
+flowchart TD
+    User([User question]) --> Loop
+
+    subgraph Loop["agent.py (ReAct loop)"]
+        direction LR
+        Agent[Agent step] -->|calls| LLM[llm.py<br/>Qwen2.5-7B]
+        LLM -->|decides tool + args| Tools[tools.py<br/>describe / infer / report]
+        Tools -->|result| Agent
+    end
+
+    Loop --> Answer([Final answer])
+    Loop -.->|records each step| Tracing[tracing.py<br/>JSON trace per run]
+    Tracing --> Eval[evaluation.py<br/>metrics over trace records]
+
+    classDef store fill:#E1F5EE,stroke:#0F6E56,color:#04342C
+    classDef compute fill:#EEEDFE,stroke:#3C3489,color:#26215C
+    classDef io fill:#F1EFE8,stroke:#5F5E5A,color:#2C2C2A
+    class LLM,Tools,Agent compute
+    class Tracing,Eval store
+    class User,Answer io
+```
 
 ## Benchmark metrics 
 
