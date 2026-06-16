@@ -14,9 +14,8 @@ What I've built:
 1. skill_correct: Did the agent pick the right tool?
 2. path_efficient: Did it take the minimum number of steps?
 3. num_loop_detected: Did the agent re-call a tool with identical arguments?
-4. tools_valid: Did it only call real and defined tools?
-5. answer_has_markup: Did the final answer have JSON/markup characters?
-6. latency_seconds: End-to-end response time
+4. answer_has_markup: Did the final answer have JSON/markup characters?
+5. latency_seconds: End-to-end response time
 
 ## Setup
 
@@ -41,23 +40,17 @@ cx-agent benchmark
 
 ## Repo structure
 
+```
 src/cx_agent/
-
 ├── data.py         # Load FABSA dataset
-
 ├── tools.py        # 3 analytics tools
-
 ├── llm.py          # LLM client and tool schemas
-
 ├── agent.py        # ReAct loop with loop detection
-
 ├── tracing.py      # Record the trace of each agent run
-
 ├── evaluation.py   # Run metrics and benchmark
-
 └── cli.py          # Command-line interface
+
 notebooks/          # EDA and development notebooks
-
 traces/             # Saved trace JSONs (gitignored)
-
 known_limitations.md  # Documented failure modes
+```
