@@ -1,8 +1,11 @@
 """FABSA dataset loader"""
 
+import os
+from dotenv import load_dotenv
 import ast
 import pandas as pd
 from datasets import load_dataset
+load_dotenv()
 
 # Valid filter values
 VALID_INDUSTRIES = [
@@ -35,7 +38,7 @@ def load_fabsa() -> tuple[pd.DataFrame, pd.DataFrame]:
     df_reviews:  one row per review
     df_exploded: one row per aspect+sentiment label
     """
-    ds = load_dataset("jordiclive/FABSA")
+    ds = load_dataset("jordiclive/FABSA", token=os.getenv("HF_TOKEN"))
     df = pd.concat([ds[split].to_pandas() for split in ds], ignore_index=True)
 
     # Parse label_codes
