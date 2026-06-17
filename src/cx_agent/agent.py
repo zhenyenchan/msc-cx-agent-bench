@@ -33,7 +33,8 @@ def _execute_tool(
         return infer(df_exploded, **arguments)
 
 
-def run(question: str, df_reviews=None, df_exploded=None, verbose: bool = True) -> dict:
+def run(question: str, df_reviews=None, df_exploded=None
+        , model: str = "ollama/qwen2.5:7b-instruct", verbose: bool = True) -> dict:
     """Run the agent on a single question.
 
     Returns a dict with:
@@ -53,7 +54,7 @@ def run(question: str, df_reviews=None, df_exploded=None, verbose: bool = True) 
             print(f"\n--- Step {step + 1} ---")
 
         # Call LLM without tools after tool result
-        response = chat(messages, use_tools=not just_got_tool_result)
+        response = chat(messages, model=model)
         just_got_tool_result = False
         msg = response.choices[0].message
 

@@ -69,6 +69,7 @@ def run_benchmark(
     test_cases: list[dict],
     df_reviews,
     df_exploded,
+    model: str = "ollama/qwen2.5:7b-instruct",
 ) -> pd.DataFrame:
     """Run a list of test cases and return a metrics DataFrame.
 
@@ -81,11 +82,13 @@ def run_benchmark(
             question=case["question"],
             df_reviews=df_reviews,
             df_exploded=df_exploded,
+            model=model, 
             expected_tool=case.get("expected_tool"),
             question_type=case.get("question_type"),
         )
         metrics = evaluate_record(record)
         rows.append({
+            "model": model,
             "question": case["question"],
             "type": case.get("question_type"),
             "expected_tool": case.get("expected_tool"),

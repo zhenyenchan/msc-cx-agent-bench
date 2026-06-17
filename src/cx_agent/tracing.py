@@ -19,6 +19,7 @@ def run_with_trace(
     expected_tool: str | None = None,
     question_type: str | None = None,
     save: bool = True,
+    model: str = "ollama/qwen2.5:7b-instruct",
 ) -> dict:
     """Run a single question and capture a full trace record.
 
@@ -28,6 +29,7 @@ def run_with_trace(
         expected_tool: ground-truth tool for skill selection metric (optional)
         question_type: 'descriptive' | 'inferential' | 'reporting' | 'out_of_scope'
         save: write the trace to disk
+        model: model string
 
     Returns:
         A trace record (dict) with run metadata, the agent's answer, and the full step trace.
@@ -35,7 +37,7 @@ def run_with_trace(
     run_id = str(uuid.uuid4())[:8]
     start = time.time()
 
-    result = run(question, df_reviews=df_reviews, df_exploded=df_exploded, verbose=False)
+    result = run(question, df_reviews=df_reviews, df_exploded=df_exploded, model=model, verbose=False)
 
     latency = round(time.time() - start, 2)
 
@@ -48,6 +50,7 @@ def run_with_trace(
         "answer": result["answer"],
         "latency_seconds": latency,
         "trace": result["trace"],
+        "model": model,
     }
 
     if save:

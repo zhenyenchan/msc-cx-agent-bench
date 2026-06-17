@@ -1,8 +1,13 @@
-"""LLM client wrapper with tool definitions"""
+"""LLM client wrapper - supports Ollama (local) and OpenRouter (cloud)"""
 
+import os
+from dotenv import load_dotenv
 from litellm import completion
 
-MODEL = "ollama/qwen2.5:7b-instruct"
+load_dotenv()
+
+# default model for poc
+DEFAULT_MODEL = "ollama/qwen2.5:7b-instruct"
 API_BASE = "http://localhost:11434"
 
 SYSTEM_PROMPT = """You are an expert customer experience analyst. You analyse customer feedback data from the FABSA dataset.
@@ -155,16 +160,32 @@ TOOL_DEFINITIONS = [
 ]
 
 
-def chat(messages: list[dict], use_tools: bool = True) -> dict:
-    """Send messages to the LLM.
+def chat(messages: list[dict], model: str = DEFAULT_MODEL) -> dict:
+    """Send messages to the LLM with tool definitions.
 
-    Returns the raw LiteLLM response object.
+    Args:
+        messages: list of message dicts (role/content)
+        model: LiteLLM model string. Examples:
+            - "ollama/qwen2.5:7b-instruct"           (local)
+            - "openrouter/openai/gpt-4o-mini"        (OpenAI via OpenRouter)
+            - "openrouter/anthropic/claude-3.5-haiku" (Anthropic via OpenRouter)
+            - "openrouter/meta-llama/llama-3.3-70b-instruct"
+            - "openrouter/qwen/qwen-2.5-7b-instruct"
     """
     kwargs = {
-        "model": MODEL,
+        "model": model,
         "messages": [{"role": "system", "content": SYSTEM_PROMPT}] + messages,
-        "api_base": API_BASE,
+        "tools": TOOL_DEFINITIONS,
     }
-    if use_tools:
-        kwargs["tools"] = TOOL_DEFINITIONS
+
+    # Route by provider
+    if model.startswith("ollama/"):
+        kwargs["api_base"] = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    elif model.startswith("openrouter/"):
+        kwargs["api_key"] = os.getenv("OPENROUTER_API_KEY")
+        if not kwargs["api_key"]:
+            raise ValueError("OPENROUTER_API_KEY not set in .env")
+    else:
+        raise ValueError(f"Unsupported model prefix: {model}")
+
     return completion(**kwargs)
