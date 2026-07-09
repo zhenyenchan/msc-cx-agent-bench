@@ -1,0 +1,11 @@
+﻿{
+  "mcpServers": {
+    "fabsa": {
+      "command": "python",
+      "args": ["-m", "cx_agent.mcp_server"],
+      "env": {
+        "FABSA_CSV_PATH": "C:/msc-cx-agent-bench/notebooks/clean_fabsa.csv"
+      }
+    }
+  }
+}
