@@ -23,3 +23,8 @@ env/
 
 # Project
 traces/
+agent_sandbox/runs/
+agent_sandbox/.claude/
+agent_sandbox/*.json
+!agent_sandbox/.mcp.json
+scratch.json
