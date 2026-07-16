@@ -1,0 +1,600 @@
+review_id,industry,child_aspect,sentiment,text,group_id
+0,Consulting,ease-of-use,positive,ORG made the entire process incredibly simple. Highly recommend!,G0001
+1,Consulting,ease-of-use,positive,Getting started with ORG was surprisingly easy. Great service!,G0001
+2,Consulting,ease-of-use,positive,Their platform is so user-friendly. A joy to work with.,G0001
+3,Consulting,ease-of-use,positive,No complications at all. ORG's system is very intuitive.,G0001
+4,Consulting,ease-of-use,positive,Everything was explained clearly and easy to understand.,G0001
+5,Consulting,ease-of-use,positive,The onboarding with ORG was seamless and quick. Fantastic!,G0001
+6,Consulting,ease-of-use,positive,Using ORG's services felt effortless from start to finish.,G0001
+7,Consulting,ease-of-use,positive,I appreciate how easy ORG makes complex tasks. Top-notch!,G0001
+8,Consulting,ease-of-use,positive,Their guidance was incredibly simple to follow. Excellent!,G0001
+9,Consulting,ease-of-use,positive,ORG provides such a straightforward and easy experience.,G0001
+10,Consulting,ease-of-use,positive,Absolutely no hassle. The whole process was smooth.,G0001
+11,Consulting,ease-of-use,positive,Couldn't believe how easy it was to integrate ORG's solutions.,G0001
+12,Consulting,ease-of-use,positive,"Their portal is very intuitive, made my life much easier.",G0001
+13,Consulting,ease-of-use,positive,"ORG handled everything, making it super easy for us.",G0001
+14,Consulting,ease-of-use,positive,The simplicity of their approach was a huge relief.,G0001
+15,Consulting,ease-of-use,positive,"Fast setup, easy communication. ORG nailed it!",G0001
+16,Consulting,ease-of-use,positive,"From start to finish, ORG offered remarkable ease-of-use.",G0001
+17,Consulting,ease-of-use,positive,They make consulting feel effortless. Highly recommend ORG!,G0001
+18,Consulting,ease-of-use,positive,"Simple, efficient, and incredibly user-friendly. Thank you, ORG!",G0001
+19,Consulting,ease-of-use,positive,I was impressed by how intuitive their tools are.,G0001
+20,Consulting,ease-of-use,positive,ORG's process is designed for maximum ease. Loved it.,G0001
+21,Consulting,ease-of-use,positive,The entire experience was straightforward and stress-free.,G0001
+22,Consulting,ease-of-use,negative,Their process was unnecessarily complicated. Not user-friendly.,G0001
+23,Consulting,ease-of-use,negative,Getting simple answers from ORG was a chore. So much friction.,G0001
+24,Consulting,ease-of-use,negative,The ORG platform was a nightmare to navigate. Very clunky interface.,G0001
+25,Consulting,ease-of-use,negative,"Reports were full of jargon, impossible to easily understand quickly.",G0001
+26,Consulting,ease-of-use,negative,Interacting with ORG required too much effort from our internal team.,G0001
+27,Consulting,ease-of-use,negative,Set up was a total hassle. Definitely not plug-and-play at all.,G0001
+28,Consulting,ease-of-use,negative,Their tools are cumbersome. We expected much simpler solutions.,G0001
+29,Consulting,ease-of-use,negative,Hard to get clear instructions. Everything felt incredibly convoluted.,G0001
+30,Consulting,ease-of-use,negative,The recommended strategies were too complex to implement easily.,G0001
+31,Consulting,ease-of-use,negative,We struggled with their onboarding process. Very inefficient and lengthy.,G0001
+32,Consulting,ease-of-use,negative,Communication channels were not straightforward. Frustratingly difficult.,G0001
+33,Consulting,ease-of-use,negative,Required constant clarification. Not an easy or smooth experience.,G0001
+34,Consulting,ease-of-use,negative,Their portal is unintuitive. Couldn't find anything quickly or logically.,G0001
+35,Consulting,ease-of-use,negative,The entire engagement felt unnecessarily difficult and draining.,G0001
+36,Consulting,ease-of-use,negative,"Expected a streamlined approach, but got complexity instead from ORG.",G0001
+37,Consulting,ease-of-use,negative,Their documentation was dense and extremely hard to follow for us.,G0001
+38,Consulting,ease-of-use,neutral,Using ORG's services felt neither difficult nor exceptionally easy.,G0001
+39,Consulting,app-website,positive,The ORG app-website is incredibly user-friendly and efficient. Made managing consultations a breeze!,G0002
+40,Consulting,app-website,positive,Fantastic platform! Booking appointments and accessing resources through their app-website was so simple.,G0002
+41,Consulting,app-website,positive,"Absolutely love the new app-website. It's intuitive, fast, and makes connecting with consultants effortless.",G0002
+42,Consulting,app-website,positive,ORG's digital presence is top-notch. The app-website offers a seamless and professional experience.,G0002
+43,Consulting,app-website,positive,What a great app-website! It streamlined our entire interaction with ORG. Highly recommend its use.,G0002
+44,Consulting,app-website,positive,So impressed with the app-website. Everything is clearly laid out and easy to navigate.,G0002
+45,Consulting,app-website,positive,The app-website for ORG is a game-changer. Quick access to reports and team communication.,G0002
+46,Consulting,app-website,positive,Excellent design and functionality. The app-website makes working with ORG incredibly convenient.,G0002
+47,Consulting,app-website,positive,Very responsive and helpful app-website. It truly enhanced our consulting project with ORG.,G0002
+48,Consulting,app-website,positive,Using their app-website saved us so much time. A truly effective and well-designed tool.,G0002
+49,Consulting,app-website,positive,Kudos to ORG for their amazing app-website. It’s a joy to use and simplifies everything.,G0002
+50,Consulting,app-website,positive,"Smooth, secure, and incredibly efficient. The ORG app-website is a fantastic resource.",G0002
+51,Consulting,app-website,positive,"The app-website provides all the information we need, right at our fingertips. Super convenient!",G0002
+52,Consulting,app-website,negative,ORG's website is incredibly slow and clunky. Frustrating experience.,G0002
+53,Consulting,app-website,negative,The app crashes every time I try to submit a form. Unacceptable for ORG.,G0002
+54,Consulting,app-website,negative,Couldn't find the services I needed on their confusing website. Total mess.,G0002
+55,Consulting,app-website,negative,ORG's online portal is not intuitive at all. Very hard to navigate.,G0002
+56,Consulting,app-website,negative,What a dated app! Looks like it was designed in 2005. Unprofessional.,G0002
+57,Consulting,app-website,negative,The website search function for ORG is absolutely useless. Couldn't find a thing.,G0002
+58,Consulting,app-website,negative,Trying to log into ORG's app is a nightmare. Always glitches.,G0002
+59,Consulting,app-website,negative,ORG's mobile site is barely functional. Pinching and zooming constantly.,G0002
+60,Consulting,app-website,negative,Their 'new' app update made things even worse. Full of bugs.,G0002
+61,Consulting,app-website,negative,I wasted so much time on ORG's unresponsive website. Needs a complete overhaul.,G0002
+62,Consulting,app-website,negative,Information on the ORG website is scattered and impossible to locate easily.,G0002
+63,Consulting,app-website,negative,The app's user interface is truly terrible. Who designed this for ORG?,G0002
+64,Consulting,app-website,negative,"ORG's online resources are hidden behind a clunky, broken portal.",G0002
+65,Consulting,app-website,negative,Very disappointed with the performance of ORG's app. Constantly freezing.,G0002
+66,Consulting,app-website,negative,This website makes ORG look unprofessional. It's difficult to use and ugly.,G0002
+67,Consulting,app-website,negative,The navigation on ORG's site is a maze. Gave up trying to find anything.,G0002
+68,Consulting,app-website,negative,ORG's app kept logging me out repeatedly. Extremely annoying!,G0002
+69,Consulting,app-website,negative,I encountered several broken links on the ORG website. Poor maintenance.,G0002
+70,Consulting,app-website,negative,The website's design for ORG is truly appalling. Very poor user experience.,G0002
+71,Consulting,app-website,negative,App performance is glacial. ORG needs to invest in proper development.,G0002
+72,Consulting,app-website,negative,Couldn't complete my query via ORG's website. It just wouldn't load.,G0002
+73,Consulting,app-website,negative,Their 'contact us' page on the website is impossible to find. Horrible design.,G0002
+74,Consulting,app-website,negative,ORG's app lacks basic features I expect from a professional service.,G0002
+75,Consulting,app-website,negative,The layout of ORG's online platform is utterly confusing. Needs simplification.,G0002
+76,Consulting,app-website,neutral,The ORG website was functional for accessing project documents and scheduling meetings.,G0002
+77,Consulting,app-website,neutral,The ORG client portal provided standard resources. It was neither exceptional nor problematic.,G0002
+78,Consulting,speed,positive,ORG provided incredibly fast turnaround on our project. Excellent!,G0003
+79,Consulting,speed,positive,Their team was super quick and efficient. Highly recommend their speed.,G0003
+80,Consulting,speed,positive,Results delivered ahead of schedule. Truly impressed by ORG's promptness.,G0003
+81,Consulting,speed,positive,Amazed by their rapid response and swift actions. Top-notch service!,G0003
+82,Consulting,speed,positive,ORG showed exceptional speed in problem-solving. Very effective and quick.,G0003
+83,Consulting,speed,positive,No time wasted; they went straight to solutions. Fantastic efficiency!,G0003
+84,Consulting,speed,positive,Prompt and effective advice from ORG. Got us on track quickly.,G0003
+85,Consulting,speed,positive,They understood our needs and acted with incredible speed. Perfect!,G0003
+86,Consulting,speed,positive,Outstanding speed of execution. ORG truly delivers fast results.,G0003
+87,Consulting,speed,positive,The fastest consultants we've ever worked with. Rapid progress guaranteed!,G0003
+88,Consulting,speed,positive,"Rapid project completion, excellent value. ORG is incredibly efficient.",G0003
+89,Consulting,speed,positive,Solution delivered with surprising speed. We are very pleased with ORG.,G0003
+90,Consulting,speed,positive,Efficient process from start to finish. ORG works unbelievably fast.,G0003
+91,Consulting,speed,positive,They got us up and running so quickly. Remarkable speed!,G0003
+92,Consulting,speed,positive,Remarkably swift project completion. ORG exceeded our expectations on timing.,G0003
+93,Consulting,speed,positive,"Quick problem-solving skills, much appreciated. ORG saved us valuable time.",G0003
+94,Consulting,speed,positive,ORG moved at lightning speed to implement our strategy. Wow!,G0003
+95,Consulting,speed,positive,Very prompt with all communications and deliverables. Consistently fast service.,G0003
+96,Consulting,speed,positive,Their speed of delivery was outstanding. We saw rapid improvements.,G0003
+97,Consulting,speed,positive,Rapid results exceeded all expectations. ORG is the definition of efficiency.,G0003
+98,Consulting,speed,positive,Efficiently handled our complex needs. ORG's team works incredibly fast.,G0003
+99,Consulting,speed,positive,Never seen a consulting team work so fast. Truly impressive.,G0003
+100,Consulting,speed,positive,"Quick insights, big impact, delivered rapidly. Thank you, ORG!",G0003
+101,Consulting,speed,negative,Our project moved too slowly with ORG. Not impressed with the pace.,G0003
+102,Consulting,speed,negative,The pace was incredibly frustrating. Deliverables were consistently delayed by ORG.,G0003
+103,Consulting,speed,negative,ORG lacked any sense of urgency. Everything took forever to complete.,G0003
+104,Consulting,speed,negative,This was the slowest consulting experience we've ever had. Very sluggish progress.,G0003
+105,Consulting,speed,negative,Progress felt perpetually stalled. ORG needs to seriously pick up the pace.,G0003
+106,Consulting,speed,negative,The project timeline kept expanding due to ORG's unacceptable slowness.,G0003
+107,Consulting,speed,negative,Expected much faster execution from ORG. Their speed was a major letdown.,G0003
+108,Consulting,speed,negative,Our critical project took way too long to reach completion with ORG.,G0003
+109,Consulting,speed,negative,Impatient with their sluggish pace and constant delays. We needed speed.,G0003
+110,Consulting,speed,negative,ORG provided only slowness. Far too slow to adapt or react to needs.,G0003
+111,Consulting,speed,negative,Their velocity was a significant concern throughout the entire project.,G0003
+112,Consulting,speed,negative,The project's momentum was non-existent. We were constantly waiting for ORG.,G0003
+113,Consulting,speed,negative,The sluggishness deeply impacted our operational timeline. Incredibly frustrating.,G0003
+114,Consulting,speed,negative,ORG was simply too slow. The project dragged on for months longer than planned.,G0003
+115,Consulting,speed,negative,Never on schedule; always behind. ORG's commitment to speed is questionable.,G0003
+116,Consulting,speed,negative,An agonizingly slow process. We expected better efficiency from ORG.,G0003
+117,Consulting,speed,neutral,"The project with ORG progressed at a consistent pace, meeting our agreed-upon timeline.",G0003
+118,Consulting,speed,neutral,ORG's delivery speed was as estimated. The project concluded within the expected timeframe.,G0003
+119,Consulting,account-access,positive,ORG's account-access is incredibly user-friendly and straightforward. Getting the info we need is always quick.,G0004
+120,Consulting,account-access,positive,The account-access platform is so intuitive. We always find what we need without any hassle. Excellent!,G0004
+121,Consulting,account-access,positive,Love how easy it is to access our data through their secure account-access. Absolutely reliable.,G0004
+122,Consulting,account-access,positive,Fantastic! The account-access feature provides instant visibility into our projects. A real time-saver.,G0004
+123,Consulting,account-access,positive,Our team appreciates the seamless account-access. It makes collaborating with ORG much more efficient.,G0004
+124,Consulting,account-access,positive,Secure and convenient account-access. It's a huge benefit working with ORG. Highly recommend their system.,G0004
+125,Consulting,account-access,positive,"The account-access system is very well-designed. Always a smooth experience, never any glitches.",G0004
+126,Consulting,account-access,positive,"Excellent account-access! It's always available when we need it, providing critical project insights swiftly.",G0004
+127,Consulting,account-access,positive,"Getting information is a breeze with their account-access. ORG clearly prioritizes user experience, which is great.",G0004
+128,Consulting,account-access,positive,We value the robust security of ORG's account-access. Complete peace of mind for our sensitive data.,G0004
+129,Consulting,account-access,positive,The streamlined account-access makes managing our projects with ORG effortless. Truly outstanding support.,G0004
+130,Consulting,account-access,positive,Instant access to our consulting reports. The account-access feature is incredibly efficient and fast.,G0004
+131,Consulting,account-access,positive,ORG's account-access is simply top-notch. So easy to navigate and find exactly what I'm looking for.,G0004
+132,Consulting,account-access,positive,Never had a problem with account-access. It's consistently reliable and always up when needed. Impressive!,G0004
+133,Consulting,account-access,positive,Such a convenient account-access portal. It truly enhances our overall experience with ORG's services.,G0004
+134,Consulting,account-access,positive,"User-friendly and secure. The account-access provided by ORG is one of its strongest, most appreciated points.",G0004
+135,Consulting,account-access,positive,The account-access offers fantastic control and transparency. We love the clear overview it provides.,G0004
+136,Consulting,account-access,positive,"Flawless account-access! It simplifies our workflow and ensures we're always informed. Thank you, ORG.",G0004
+137,Consulting,account-access,positive,Quick and easy account-access. Exactly what we need to stay updated on our consulting engagements.,G0004
+138,Consulting,account-access,negative,Couldn't log in for days. ORG's account access is a joke.,G0004
+139,Consulting,account-access,negative,Password resets never work. My ORG account is useless now.,G0004
+140,Consulting,account-access,negative,Constantly locked out of my ORG account. So frustrating!,G0004
+141,Consulting,account-access,negative,ORG's account access portal is incredibly slow. Wastes so much time.,G0004
+142,Consulting,account-access,negative,Why is ORG's login process so complicated? Pure agony.,G0004
+143,Consulting,account-access,negative,Customer service offered no help with my locked ORG account.,G0004
+144,Consulting,account-access,negative,My ORG account access keeps expiring randomly. Unreliable!,G0004
+145,Consulting,account-access,negative,Can't get into ORG's system. Their access management is broken.,G0004
+146,Consulting,account-access,negative,The ORG account setup was a nightmare. Never again.,G0004
+147,Consulting,account-access,negative,Feeling completely unsupported with ORG account access issues.,G0004
+148,Consulting,account-access,negative,Login page always errors out. ORG needs to fix this ASAP.,G0004
+149,Consulting,account-access,negative,Multi-factor authentication for ORG account access is a disaster.,G0004
+150,Consulting,account-access,negative,I'm blocked from necessary features. ORG's access control failed.,G0004
+151,Consulting,account-access,negative,Trying to access my ORG account is a continuous struggle.,G0004
+152,Consulting,account-access,negative,"This ""improved"" ORG account access is actually worse. Terrible design.",G0004
+153,Consulting,account-access,negative,My ORG account suddenly disappeared. They have no answers.,G0004
+154,Consulting,account-access,negative,The ORG account access system feels insecure and unreliable.,G0004
+155,Consulting,account-access,negative,Spend more time trying to log in than working. Fix ORG access!,G0004
+156,Consulting,account-access,negative,"Forgot my password once, now I'm permanently locked out by ORG.",G0004
+157,Consulting,account-access,neutral,How do I access my ORG platform account?,G0004
+158,Consulting,account-access,neutral,I need to set up my new ORG client account.,G0004
+159,Consulting,attitude-of-staff,positive,The team at ORG was incredibly supportive and positive throughout our project.,G0005
+160,Consulting,attitude-of-staff,positive,"Every staff member at ORG demonstrated an excellent, can-do attitude.",G0005
+161,Consulting,attitude-of-staff,positive,We were so impressed by the friendly and approachable nature of ORG's consultants.,G0005
+162,Consulting,attitude-of-staff,positive,ORG's staff showed remarkable professionalism and a truly positive outlook.,G0005
+163,Consulting,attitude-of-staff,positive,The consultants at ORG were always enthusiastic and genuinely helpful.,G0005
+164,Consulting,attitude-of-staff,positive,Their fantastic attitude made working with ORG a real pleasure.,G0005
+165,Consulting,attitude-of-staff,positive,ORG staff consistently went above and beyond with their positive demeanor.,G0005
+166,Consulting,attitude-of-staff,positive,Such a wonderful and accommodating team at ORG. Highly recommend their attitude!,G0005
+167,Consulting,attitude-of-staff,positive,The positive and proactive attitude of ORG's staff was truly outstanding.,G0005
+168,Consulting,attitude-of-staff,positive,Every interaction with ORG's team was met with genuine warmth and professionalism.,G0005
+169,Consulting,attitude-of-staff,positive,ORG's staff displayed an amazing level of patience and understanding.,G0005
+170,Consulting,attitude-of-staff,positive,We appreciated the consistently positive and engaging attitude from ORG.,G0005
+171,Consulting,attitude-of-staff,positive,The ORG team's respectful and courteous approach made all the difference.,G0005
+172,Consulting,attitude-of-staff,positive,Their collaborative and dedicated attitude helped us achieve great results.,G0005
+173,Consulting,attitude-of-staff,positive,"ORG's consultants maintained an excellent, optimistic attitude even under pressure.",G0005
+174,Consulting,attitude-of-staff,positive,The staff at ORG were always so responsive and pleasant to work with.,G0005
+175,Consulting,attitude-of-staff,positive,Truly a joy to work with ORG; their positive attitude is infectious.,G0005
+176,Consulting,attitude-of-staff,positive,Outstanding support and a wonderfully positive mindset from ORG's experts.,G0005
+177,Consulting,attitude-of-staff,positive,We found ORG's staff to be exceptionally friendly and remarkably understanding.,G0005
+178,Consulting,attitude-of-staff,positive,"The whole team at ORG exuded a fantastic, helpful, and positive spirit.",G0005
+179,Consulting,attitude-of-staff,positive,ORG's consultants showed incredible dedication and a consistently positive attitude.,G0005
+180,Consulting,attitude-of-staff,positive,Their can-do attitude and helpfulness made our project with ORG seamless.,G0005
+181,Consulting,attitude-of-staff,positive,The staff were always so upbeat and professional. A pleasure to interact with ORG.,G0005
+182,Consulting,attitude-of-staff,positive,ORG's team provided excellent service with an incredibly positive disposition.,G0005
+183,Consulting,attitude-of-staff,positive,"Every ORG employee was respectful, courteous, and genuinely eager to assist.",G0005
+184,Consulting,attitude-of-staff,positive,The consultants' positive and engaging attitude made complex tasks feel easy.,G0005
+185,Consulting,attitude-of-staff,positive,Highly recommend ORG for their staff's outstanding and supportive demeanor.,G0005
+186,Consulting,attitude-of-staff,positive,We experienced nothing but positive and proactive attitudes from ORG's staff.,G0005
+187,Consulting,attitude-of-staff,positive,A big thank you to ORG for their team's consistently pleasant and helpful attitude.,G0005
+188,Consulting,attitude-of-staff,negative,Staff were incredibly arrogant and dismissive of our concerns.,G0005
+189,Consulting,attitude-of-staff,negative,Very unprofessional attitude from their consulting team. Avoid.,G0005
+190,Consulting,attitude-of-staff,negative,Their team seemed completely uninterested in helping us succeed.,G0005
+191,Consulting,attitude-of-staff,negative,Rude and condescending responses from consultants throughout.,G0005
+192,Consulting,attitude-of-staff,negative,Felt talked down to by every single staff member. Disappointing.,G0005
+193,Consulting,attitude-of-staff,negative,"The consultants had a terrible, superior attitude towards us.",G0005
+194,Consulting,attitude-of-staff,negative,Unhelpful and impatient staff made the entire process difficult.,G0005
+195,Consulting,attitude-of-staff,negative,Zero empathy or understanding from their representatives. Poor service.,G0005
+196,Consulting,attitude-of-staff,negative,Their team's overall attitude was simply unacceptable for professionals.,G0005
+197,Consulting,attitude-of-staff,negative,Lacked basic professionalism and respect during all interactions.,G0005
+198,Consulting,attitude-of-staff,neutral,Staff at ORG were neither exceptional nor problematic regarding their attitude.,G0005
+199,Banking,ease-of-use,positive,Simple to use and incredibly efficient. Excellent.,G0006
+200,Banking,ease-of-use,positive,ORG's app is incredibly user-friendly. So easy!,G0006
+201,Banking,ease-of-use,positive,Setting up my account was a breeze with ORG.,G0006
+202,Banking,ease-of-use,positive,Transactions are so straightforward. Love ORG.,G0006
+203,Banking,ease-of-use,positive,Seamless experience. Managing finances has never been easier.,G0006
+204,Banking,ease-of-use,positive,ORG makes banking truly effortless. Highly recommend.,G0006
+205,Banking,ease-of-use,positive,Quick and intuitive interface. A joy to use.,G0006
+206,Banking,ease-of-use,positive,The ORG platform is so clear and easy to navigate.,G0006
+207,Banking,ease-of-use,positive,Absolutely no fuss with ORG. Banking made simple.,G0006
+208,Banking,ease-of-use,positive,Love how ORG simplifies everything. Fast and efficient.,G0006
+209,Banking,ease-of-use,positive,"Effortless banking, every time. Thank you, ORG!",G0006
+210,Banking,ease-of-use,positive,ORG's app is a godsend for managing money easily.,G0006
+211,Banking,ease-of-use,positive,Setting up payments is so simple on ORG. Fantastic!,G0006
+212,Banking,ease-of-use,positive,User interface is top-notch. Very easy to understand.,G0006
+213,Banking,ease-of-use,positive,Never thought banking could be this convenient. ORG delivers.,G0006
+214,Banking,ease-of-use,positive,The ORG experience is just so smooth and straightforward.,G0006
+215,Banking,ease-of-use,positive,ORG makes accessing my funds incredibly easy. Superb!,G0006
+216,Banking,ease-of-use,positive,Quick visibility of all transactions. No waiting. ORG is great.,G0006
+217,Banking,ease-of-use,positive,Managing my budget is effortless with ORG's tools.,G0006
+218,Banking,ease-of-use,positive,"From setup to daily use, ORG is incredibly simple.",G0006
+219,Banking,ease-of-use,positive,The ORG app is intuitively designed. Makes banking easy.,G0006
+220,Banking,ease-of-use,positive,No complicated steps. ORG keeps it wonderfully simple.,G0006
+221,Banking,ease-of-use,positive,"So easy to check balances and move money. Bravo, ORG!",G0006
+222,Banking,ease-of-use,positive,ORG's online banking is incredibly user-friendly.,G0006
+223,Banking,ease-of-use,positive,Switching to ORG was so easy and hassle-free.,G0006
+224,Banking,ease-of-use,positive,Quick transactions and a very clear layout. ORG is excellent.,G0006
+225,Banking,ease-of-use,negative,Login is a nightmare. Too many steps and Face ID never works properly. So frustrating.,G0006
+226,Banking,ease-of-use,negative,"The app layout is so confusing. Can't find anything easily. Needs a redesign, ORG.",G0006
+227,Banking,ease-of-use,negative,Can't even freeze my card quickly. The option is buried deep in settings. Annoying.,G0006
+228,Banking,ease-of-use,negative,Setting up new payees is unnecessarily complicated. Why so many steps for basic tasks?,G0006
+229,Banking,ease-of-use,negative,"The website feels ancient. It's impossible to navigate, totally clunky and outdated.",G0006
+230,Banking,ease-of-use,negative,"QR code login feature is unreliable; often just fails. Not easy at all, ORG.",G0006
+231,Banking,ease-of-use,negative,Changing my payment date was impossible. The app just kept glitching and freezing.,G0006
+232,Banking,ease-of-use,negative,Finding my statements is a puzzle every month. Needs to be more straightforward.,G0006
+233,Banking,ease-of-use,negative,"App used to be good, now it's so slow and laggy. Not user-friendly anymore, ORG.",G0006
+234,Banking,ease-of-use,negative,Contacting support through the app is a maze. Hard to find actual help easily.,G0006
+235,Banking,ease-of-use,negative,ORG's app is so clunky. Takes forever to find what I need. Completely unintuitive design.,G0006
+236,Banking,ease-of-use,negative,Depositing checks with ORG is a constant struggle. The process is needlessly complicated and buggy.,G0006
+237,Banking,ease-of-use,neutral,"ORG's online banking is functional. It's not difficult to navigate, but nothing particularly stands out.",G0006
+238,Banking,app-website,positive,Amazing! Best innovative app I have ever used from ORG.,G0007
+239,Banking,app-website,positive,"ORG's app is wonderful, system and card are fantastic!",G0007
+240,Banking,app-website,positive,"So easy to understand, with truly nice features. ORG nails it!",G0007
+241,Banking,app-website,positive,Absolutely love the ORG banking app. So intuitive and fast.,G0007
+242,Banking,app-website,positive,Seamless experience! The ORG website and app are incredibly user-friendly.,G0007
+243,Banking,app-website,positive,ORG's digital platform is top-notch. Banking made simple and enjoyable.,G0007
+244,Banking,app-website,positive,"Finally, a banking app that just *works*. Kudos to ORG!",G0007
+245,Banking,app-website,positive,Highly recommend ORG's app. It's incredibly efficient and reliable.,G0007
+246,Banking,app-website,positive,Fantastic design and so convenient. ORG's online banking is superb.,G0007
+247,Banking,app-website,positive,Managing finances is a breeze with ORG's excellent app interface.,G0007
+248,Banking,app-website,positive,ORG's website is incredibly modern and feature-rich. A joy to use.,G0007
+249,Banking,app-website,positive,The best mobile banking app out there. ORG sets the standard!,G0007
+250,Banking,app-website,positive,"Super impressed with ORG's digital services. Fast, secure, and smart.",G0007
+251,Banking,app-website,negative,ORG's app constantly crashes. Unreliable for banking on the go.,G0007
+252,Banking,app-website,negative,The website is so slow! Takes ages to load any page.,G0007
+253,Banking,app-website,negative,Logging into the ORG app is a nightmare. Always glitches.,G0007
+254,Banking,app-website,negative,Terrible user interface for ORG's online banking. So hard to navigate.,G0007
+255,Banking,app-website,negative,App keeps logging me out. Extremely annoying and inconvenient.,G0007
+256,Banking,app-website,negative,ORG's mobile banking is buggy. Can't complete transfers sometimes.,G0007
+257,Banking,app-website,negative,"Website design is archaic. Needs a serious modern update, ORG.",G0007
+258,Banking,app-website,negative,Chatbot on ORG's platform is useless. Never resolves anything.,G0007
+259,Banking,app-website,negative,Can't even check my balance reliably on ORG's app. So frustrating.,G0007
+260,Banking,app-website,negative,The ORG app frequently freezes. Unacceptable for a bank.,G0007
+261,Banking,app-website,negative,Why is ORG's digital platform so difficult to use? Awful experience.,G0007
+262,Banking,app-website,negative,Missing key features on ORG's mobile app. Must use the desktop.,G0007
+263,Banking,app-website,negative,ORG's website security prompts are overly complicated and repetitive.,G0007
+264,Banking,app-website,negative,My transactions often fail on the ORG app. Very concerning.,G0007
+265,Banking,app-website,negative,This ORG app update broke everything. Now it's unusable.,G0007
+266,Banking,app-website,negative,Notifications from ORG's app are inconsistent or don't show.,G0007
+267,Banking,app-website,negative,ORG's online banking is a labyrinth. Finding anything is a chore.,G0007
+268,Banking,app-website,negative,Buttons on the ORG app are often unresponsive. Infuriating.,G0007
+269,Banking,app-website,negative,Takes too many clicks to do simple tasks on ORG's platform.,G0007
+270,Banking,app-website,negative,Can't easily view statements through ORG's clunky mobile app.,G0007
+271,Banking,app-website,negative,The ORG app constantly asks me to re-enter details. Annoying.,G0007
+272,Banking,app-website,negative,Error messages on ORG's website are vague and unhelpful.,G0007
+273,Banking,app-website,negative,Forced app updates always introduce new problems. Fix ORG's app!,G0007
+274,Banking,app-website,negative,ORG's digital services are just not up to par. Very disappointing.,G0007
+275,Banking,app-website,neutral,"The ORG app loaded fine, showing my account overview. Nothing special.",G0007
+276,Banking,app-website,neutral,I used the ORG website to check my statements. It was functional.,G0007
+277,Banking,speed,positive,Sending money is incredibly fast with ORG. No more waiting like traditional banks!,G0008
+278,Banking,speed,positive,"My ORG card arrived super quick, ahead of schedule. Excellent service!",G0008
+279,Banking,speed,positive,"Transactions are instant, making budgeting so much easier. Love ORG!",G0008
+280,Banking,speed,positive,Opening an account with ORG was surprisingly quick and painless. Highly recommend.,G0008
+281,Banking,speed,positive,Money transfers are blazing fast. ORG really delivers on speed and convenience.,G0008
+282,Banking,speed,positive,The ORG app is lightning-fast and so responsive. A joy to use daily.,G0008
+283,Banking,speed,positive,"Deposit processed instantly. No delays, just pure efficiency from ORG. Fantastic.",G0008
+284,Banking,speed,positive,Quick access to my funds when I need them. ORG understands urgency completely.,G0008
+285,Banking,speed,positive,Payment processing is incredibly swift. Never a lag or wait with ORG. Superb.,G0008
+286,Banking,speed,positive,Got my new ORG card in just two days. Unbelievably quick delivery service!,G0008
+287,Banking,speed,negative,Refunds take forever with ORG. So slow!,G0008
+288,Banking,speed,negative,Transfers are painfully slow. Unacceptable speed.,G0008
+289,Banking,speed,negative,App is laggy and unresponsive. Frustratingly slow.,G0008
+290,Banking,speed,negative,"Card delivery took weeks, not days. Very poor service speed.",G0008
+291,Banking,speed,negative,Customer service response time is incredibly slow. Unacceptable delays.,G0008
+292,Banking,speed,negative,Deposits take ages to clear. Needs much faster processing.,G0008
+293,Banking,speed,negative,ORG's website is sluggish. They need to drastically improve speed.,G0008
+294,Banking,speed,negative,Payments are never instant. There are always frustrating delays.,G0008
+295,Banking,speed,negative,Account opening was a snail's pace. It took too long.,G0008
+296,Banking,speed,negative,Issue resolution takes too many days with ORG. Very slow.,G0008
+297,Banking,speed,negative,Money transfers are unexpectedly slow. It's a bad experience.,G0008
+298,Banking,speed,negative,"My international transfer is stuck, incredibly slow. Where is it?",G0008
+299,Banking,speed,negative,ORG's transaction processing speed is dreadfully slow. Improve it!,G0008
+300,Banking,speed,negative,Waiting forever for my new card to arrive. It's taking ages.,G0008
+301,Banking,speed,negative,Chat support is always slow to respond. Not helpful quickly at all.,G0008
+302,Banking,speed,negative,Refunds take far too long to show up. Very disappointing speed.,G0008
+303,Banking,speed,negative,"App loads slowly, often freezes. It really needs optimizing for speed.",G0008
+304,Banking,speed,negative,Had to wait days for a simple verification. This is incredibly slow.,G0008
+305,Banking,speed,negative,Payments take an eternity to go through. Not efficient at all.,G0008
+306,Banking,speed,negative,The whole process felt incredibly slow and inefficient. Very annoying.,G0008
+307,Banking,speed,negative,Support takes ages to get back to you. Not swift or timely.,G0008
+308,Banking,speed,negative,Clearing checks takes way too long at ORG. Modernize this!,G0008
+309,Banking,speed,negative,ORG's system is just too slow. Everything lags behind.,G0008
+310,Banking,speed,negative,Funds never seem to arrive on time. Always slow transfers.,G0008
+311,Banking,speed,negative,Card replacement took over a week to arrive. Not fast enough.,G0008
+312,Banking,speed,negative,Login process is slow. Needs better speed and responsiveness.,G0008
+313,Banking,speed,negative,Getting approval for anything takes forever. Such a slow process.,G0008
+314,Banking,speed,negative,ORG makes simple tasks slow. It's very frustrating and inefficient.,G0008
+315,Banking,speed,negative,My credit card application is moving at a snail's pace. So slow.,G0008
+316,Banking,speed,neutral,Transactions at ORG are processed at a standard pace.,G0008
+317,Banking,account-access,positive,I love the ability to immediately access my money and card. It offers so many options that work for ME! Well done ORG!,G0009
+318,Banking,account-access,positive,Easy and accessible everywhere. Thanks ORG!,G0009
+319,Banking,account-access,positive,"Convenient and easily accessible service, always. ORG is the best!",G0009
+320,Banking,account-access,positive,"Instant access to my funds! Absolutely fantastic, ORG!",G0009
+321,Banking,account-access,positive,"So easy to access my account details anytime, anywhere.",G0009
+322,Banking,account-access,positive,Convenient account access whenever I need it. A lifesaver!,G0009
+323,Banking,account-access,positive,ORG makes accessing my money a breeze. Highly recommended!,G0009
+324,Banking,account-access,positive,Always great to have my accounts easily accessible on the go.,G0009
+325,Banking,account-access,positive,"Fantastic, seamless access to all my banking. Thank you, ORG!",G0009
+326,Banking,account-access,positive,I can get to my money immediately with ORG's service.,G0009
+327,Banking,account-access,positive,Quick and reliable account access 24/7. Flawless!,G0009
+328,Banking,account-access,positive,"Effortless access to my accounts, truly amazing experience.",G0009
+329,Banking,account-access,positive,"Simple and effective account access from ORG, just what I needed.",G0009
+330,Banking,account-access,positive,My money is always just a tap away. Thanks ORG for the ease!,G0009
+331,Banking,account-access,positive,Great to have such easy access to my finances with ORG.,G0009
+332,Banking,account-access,positive,"Super convenient access to my accounts, any time I want.",G0009
+333,Banking,account-access,positive,"ORG provides excellent, immediate account access. Very impressed!",G0009
+334,Banking,account-access,positive,I appreciate the easy access to all my funds. ORG delivers!,G0009
+335,Banking,account-access,positive,"Unbeatable account access, so simple to use! Five stars for ORG.",G0009
+336,Banking,account-access,positive,Accessing my banking has never been smoother with ORG's features.,G0009
+337,Banking,account-access,positive,"Quick, secure access to my accounts is a game changer. Thanks ORG!",G0009
+338,Banking,account-access,positive,ORG offers the best and easiest account access I've ever had.,G0009
+339,Banking,account-access,positive,"Love the flexibility of accessing my account anywhere, instantly.",G0009
+340,Banking,account-access,positive,"My funds are always within reach, thanks to ORG's perfect access.",G0009
+341,Banking,account-access,negative,Cannot access my account! Website is constantly broken. ORG is a joke.,G0009
+342,Banking,account-access,negative,Locked out again. Their verification process is absolutely impossible to get through.,G0009
+343,Banking,account-access,negative,ORG's app won't let me log in. Always an error. Can't see my money!,G0009
+344,Banking,account-access,negative,My account is frozen. Zero access for days. No help from ORG customer service.,G0009
+345,Banking,account-access,negative,"Tried changing password, but ORG's system just cycles. No access to my funds.",G0009
+346,Banking,account-access,negative,Seriously frustrated! Can't log into ORG for my banking. Terrible system.,G0009
+347,Banking,account-access,negative,Why can't I access my account? ORG is making banking impossible for me.,G0009
+348,Banking,account-access,negative,Completely locked out. Their ID verification failed for the tenth time. Useless ORG.,G0009
+349,Banking,account-access,negative,"ORG's online access is a nightmare. Always down, always issues. Avoid!",G0009
+350,Banking,account-access,negative,"Lost access to everything. ORG's security is too tight, no way to get back in.",G0009
+351,Banking,account-access,negative,Impossible to log in from abroad. ORG locks accounts instantly. So annoying.,G0009
+352,Banking,account-access,negative,My funds are stuck! Can't access my ORG account for urgent payments.,G0009
+353,Banking,account-access,negative,The ORG portal is a disaster. Keeps kicking me out. No account access.,G0009
+354,Banking,account-access,negative,Always glitches when I try to log in. ORG needs to fix their access issues.,G0009
+355,Banking,account-access,neutral,How do I update my online banking password for ORG?,G0009
+356,Banking,account-access,neutral,Forgot my ORG login details. How can I get access back?,G0009
+357,Banking,attitude-of-staff,positive,ORG staff are always so helpful and friendly. A pleasure to deal with.,G0010
+358,Banking,attitude-of-staff,positive,Every interaction with ORG's team is positive. They truly care about customers.,G0010
+359,Banking,attitude-of-staff,positive,Their customer service representatives are exceptionally professional and kind.,G0010
+360,Banking,attitude-of-staff,positive,Always great support from ORG. The staff consistently go the extra mile.,G0010
+361,Banking,attitude-of-staff,positive,Love ORG! Their team is so patient and understanding with all my questions.,G0010
+362,Banking,attitude-of-staff,positive,Fantastic service! The staff always greet you with a genuine smile.,G0010
+363,Banking,attitude-of-staff,positive,ORG's employees are a credit to the company. So polite and efficient.,G0010
+364,Banking,attitude-of-staff,positive,"Had an issue, but the ORG staff resolved it quickly and with grace.",G0010
+365,Banking,attitude-of-staff,positive,Truly appreciate the helpful and positive attitude of ORG's support team.,G0010
+366,Banking,attitude-of-staff,positive,The people at ORG make banking a breeze. Always professional and warm.,G0010
+367,Banking,attitude-of-staff,positive,Consistently excellent attitude from all ORG staff I've encountered.,G0010
+368,Banking,attitude-of-staff,positive,They make you feel valued. ORG's staff are simply the best in service.,G0010
+369,Banking,attitude-of-staff,positive,Always get amazing support. ORG's staff are incredibly friendly and efficient.,G0010
+370,Banking,attitude-of-staff,positive,Staff at ORG are always ready to assist with a positive outlook and patience.,G0010
+371,Banking,attitude-of-staff,positive,Such a pleasant experience talking to ORG's customer service. Always helpful.,G0010
+372,Banking,attitude-of-staff,positive,ORG's team shows great empathy and understanding. Really appreciated their help.,G0010
+373,Banking,attitude-of-staff,positive,The best customer service. ORG staff are attentive and very kind.,G0010
+374,Banking,attitude-of-staff,positive,"Every time I call, ORG's staff are wonderfully supportive and clear.",G0010
+375,Banking,attitude-of-staff,positive,Professional and warm. ORG's employees are a joy to interact with.,G0010
+376,Banking,attitude-of-staff,positive,They genuinely want to help. ORG's team sets the standard for service.,G0010
+377,Banking,attitude-of-staff,positive,"ORG staff are incredibly patient, explaining things clearly every time.",G0010
+378,Banking,attitude-of-staff,positive,Top-notch service! The friendly attitude of ORG's team makes a huge difference.,G0010
+379,Banking,attitude-of-staff,negative,Staff attitude at ORG is just terrible. So unhelpful.,G0010
+380,Banking,attitude-of-staff,negative,"Rude, dismissive staff. Made me want to switch banks immediately. ORG fails here.",G0010
+381,Banking,attitude-of-staff,negative,Customer service? More like customer disservice. ORG staff are appalling.,G0010
+382,Banking,attitude-of-staff,negative,The staff at ORG are so condescending. No empathy at all.,G0010
+383,Banking,attitude-of-staff,negative,Every ORG employee I spoke to had a bad attitude. Zero stars.,G0010
+384,Banking,attitude-of-staff,negative,Unprofessional and uncooperative. ORG needs to train its staff better.,G0010
+385,Banking,attitude-of-staff,negative,ORG staff are incredibly rude. They act like they're doing you a favour.,G0010
+386,Banking,attitude-of-staff,negative,No help from ORG's staff. Their attitude is disgusting.,G0010
+387,Banking,attitude-of-staff,negative,Dealing with ORG's staff is a nightmare. Always a frustrating experience.,G0010
+388,Banking,attitude-of-staff,negative,Poor staff attitude. They don't care about customers at ORG.,G0010
+389,Banking,attitude-of-staff,negative,ORG's customer support staff made me feel stupid. Unacceptable.,G0010
+390,Banking,attitude-of-staff,negative,Such arrogant staff at ORG. Don't waste your time.,G0010
+391,Banking,attitude-of-staff,negative,The attitude of ORG's employees is a major turn-off. Awful service.,G0010
+392,Banking,attitude-of-staff,negative,"Staff interaction was beyond unpleasant. ORG, fix your team's attitude.",G0010
+393,Banking,attitude-of-staff,negative,Rude representatives. Why are ORG staff so consistently unhelpful?,G0010
+394,Banking,attitude-of-staff,negative,Felt belittled by ORG staff. Their arrogance is shocking.,G0010
+395,Banking,attitude-of-staff,neutral,"ORG's phone support handled my query. The agent followed stated protocols, providing the necessary information without fuss.",G0010
+396,Banking,attitude-of-staff,neutral,My branch visit to ORG resulted in the transaction completing. Staff processed it efficiently; interaction was purely business.,G0010
+397,Information Technology,ease-of-use,positive,ORG's platform is incredibly intuitive. So easy to get started!,G0011
+398,Information Technology,ease-of-use,positive,Navigating ORG's software was a breeze. Highly user-friendly experience.,G0011
+399,Information Technology,ease-of-use,positive,Loved how simple ORG makes everything. Absolutely no learning curve!,G0011
+400,Information Technology,ease-of-use,positive,The ORG system is wonderfully straightforward. Makes our tasks much easier.,G0011
+401,Information Technology,ease-of-use,positive,So impressed by ORG's effortless interface. A real time-saver!,G0011
+402,Information Technology,ease-of-use,positive,ORG’s solution offers amazing ease of use. Anyone can pick it up quickly.,G0011
+403,Information Technology,ease-of-use,positive,Seamless experience with ORG. Their tools are so easy to manage.,G0011
+404,Information Technology,ease-of-use,positive,"We appreciate ORG's simple design. It just works, every time.",G0011
+405,Information Technology,ease-of-use,positive,ORG makes complex IT simple. Truly user-friendly and efficient.,G0011
+406,Information Technology,ease-of-use,positive,The platform from ORG is very easy to operate. Excellent design.,G0011
+407,Information Technology,ease-of-use,negative,ORG's system is incredibly hard to use. Very confusing.,G0011
+408,Information Technology,ease-of-use,negative,The new platform from ORG is far too complicated for daily tasks.,G0011
+409,Information Technology,ease-of-use,negative,I find ORG's software completely unintuitive and frustrating.,G0011
+410,Information Technology,ease-of-use,negative,"Navigating their interface is a frustrating nightmare, not user-friendly.",G0011
+411,Information Technology,ease-of-use,negative,There's a steep learning curve with ORG's product. Not ideal.,G0011
+412,Information Technology,ease-of-use,negative,User experience with ORG is just terrible. Needs improvement.,G0011
+413,Information Technology,ease-of-use,negative,Their system feels clunky and outdated. A real struggle.,G0011
+414,Information Technology,ease-of-use,negative,It takes too many clicks to do anything simple with ORG.,G0011
+415,Information Technology,ease-of-use,negative,Operating ORG's new tools is a real struggle for my team.,G0011
+416,Information Technology,ease-of-use,negative,The design is confusing; nothing is where it should be. Bad UX.,G0011
+417,Information Technology,ease-of-use,negative,ORG's platform is not user-friendly at all. Very complex.,G0011
+418,Information Technology,ease-of-use,negative,I waste so much time trying to figure ORG out. It's inefficient.,G0011
+419,Information Technology,ease-of-use,negative,Setting up ORG's service was overly complex and time-consuming.,G0011
+420,Information Technology,ease-of-use,negative,The interface for ORG's product is a mess. Hard to navigate.,G0011
+421,Information Technology,ease-of-use,negative,This software is completely bewildering to new users. No clarity.,G0011
+422,Information Technology,ease-of-use,negative,ORG desperately needs to improve their UX. It's a priority.,G0011
+423,Information Technology,ease-of-use,negative,I spend more time learning than actually working with ORG's solution.,G0011
+424,Information Technology,ease-of-use,negative,Their application is cumbersome and slow. Poor design choices.,G0011
+425,Information Technology,ease-of-use,negative,Simple tasks become major hurdles with ORG. Not streamlined.,G0011
+426,Information Technology,ease-of-use,negative,I wish ORG made things easier to understand and operate.,G0011
+427,Information Technology,ease-of-use,negative,The instructions provided are not clear enough for ORG's features.,G0011
+428,Information Technology,ease-of-use,negative,ORG's interface feels like it's from another decade. Very old.,G0011
+429,Information Technology,ease-of-use,negative,Completely frustrated by ORG's lack of simplicity. Overly complex.,G0011
+430,Information Technology,ease-of-use,negative,The product has poor usability; it's a chore to get things done.,G0011
+431,Information Technology,ease-of-use,negative,Every interaction with ORG is a challenge. Needs simplification.,G0011
+432,Information Technology,ease-of-use,negative,It's difficult to find basic functions in ORG. Poor layout.,G0011
+433,Information Technology,ease-of-use,negative,ORG's platform requires far too much training for basic operation.,G0011
+434,Information Technology,ease-of-use,negative,I constantly get lost in ORG's menus. Very disorienting.,G0011
+435,Information Technology,ease-of-use,negative,Their solution is not straightforward at all. Confusing workflow.,G0011
+436,Information Technology,ease-of-use,negative,The learning curve for ORG is ridiculously high. Not accessible.,G0011
+437,Information Technology,ease-of-use,neutral,ORG's platform is generally functional. It gets the job done without being particularly difficult or simple to learn.,G0011
+438,Information Technology,app-website,positive,ORG's app is incredibly user-friendly. A pleasure to navigate!,G0012
+439,Information Technology,app-website,positive,"The website design is sleek and modern. Very impressive, ORG!",G0012
+440,Information Technology,app-website,positive,Love how intuitive ORG's platform is. Makes everything so easy.,G0012
+441,Information Technology,app-website,positive,Seamless experience from start to finish. ORG truly delivers!,G0012
+442,Information Technology,app-website,positive,This app is a game-changer. So reliable and feature-rich.,G0012
+443,Information Technology,app-website,positive,Highly recommend ORG's website. It's fast and very efficient.,G0012
+444,Information Technology,app-website,positive,"Fantastic functionality and beautiful interface. Well done, ORG!",G0012
+445,Information Technology,app-website,positive,ORG's app works flawlessly every time. Couldn't ask for more.,G0012
+446,Information Technology,app-website,positive,The site is so well-organized. Finding information is a breeze.,G0012
+447,Information Technology,app-website,positive,Impressed by the speed and responsiveness of ORG's platform.,G0012
+448,Information Technology,app-website,positive,A joy to use! The ORG app has made my tasks much simpler.,G0012
+449,Information Technology,app-website,positive,Top-notch design and performance. ORG's website is superb.,G0012
+450,Information Technology,app-website,positive,User experience on ORG's platform is truly exceptional. Five stars!,G0012
+451,Information Technology,app-website,positive,Flawless navigation and powerful features. This app is the best.,G0012
+452,Information Technology,app-website,positive,ORG's website is extremely reliable. Always available when I need it.,G0012
+453,Information Technology,app-website,positive,The best app I've used in a long time. So convenient!,G0012
+454,Information Technology,app-website,positive,ORG has created a brilliant and highly functional web presence.,G0012
+455,Information Technology,app-website,positive,Exactly what I needed! The ORG app is perfectly designed.,G0012
+456,Information Technology,app-website,positive,Couldn't be happier with ORG's platform. It's simply outstanding.,G0012
+457,Information Technology,app-website,positive,Makes complex tasks feel simple. ORG's app is a lifesaver.,G0012
+458,Information Technology,app-website,positive,"Beautifully designed and incredibly effective. Thank you, ORG!",G0012
+459,Information Technology,app-website,positive,So responsive and quick. ORG's website sets the standard.,G0012
+460,Information Technology,app-website,positive,"Simple, powerful, and incredibly useful. Love ORG's digital tools.",G0012
+461,Information Technology,app-website,positive,The features on ORG's app are exactly what I was looking for. Excellent!,G0012
+462,Information Technology,app-website,positive,My go-to platform now. ORG's website is incredibly efficient.,G0012
+463,Information Technology,app-website,negative,ORG app keep crashing my phone. Very bad experience.,G0012
+464,Information Technology,app-website,negative,The ORG website is too slow. Nothing loads anymore.,G0012
+465,Information Technology,app-website,negative,Cannot login to ORG app. Password not working. Please fix it.,G0012
+466,Information Technology,app-website,negative,"After ORG update, my video calls stopped working. Not happy at all.",G0012
+467,Information Technology,app-website,negative,ORG app is so confusing. I can't find anything now.,G0012
+468,Information Technology,app-website,negative,This ORG website always freezes. Lost all my progress.,G0012
+469,Information Technology,app-website,negative,Why ORG app asking for password every time? So annoying.,G0012
+470,Information Technology,app-website,negative,ORG website is totally broken. Pages not showing correctly.,G0012
+471,Information Technology,app-website,negative,My account gone from ORG app after update. Need help.,G0012
+472,Information Technology,app-website,negative,ORG app notifications are not coming. Missing important alerts.,G0012
+473,Information Technology,app-website,negative,Too many bugs in ORG app. Make it work properly.,G0012
+474,Information Technology,app-website,negative,My phone battery drains fast with ORG app running. Uninstalled.,G0012
+475,Information Technology,app-website,negative,ORG website payment option never works for me. Can't buy.,G0012
+476,Information Technology,app-website,negative,This ORG app uses too much data on my mobile plan.,G0012
+477,Information Technology,app-website,neutral,The website loads fine on desktop.,G0012
+478,Information Technology,app-website,neutral,Just opened the app; haven't tried the features yet.,G0012
+479,Information Technology,speed,positive,ORG's service is incredibly fast. Problems solved in minutes!,G0013
+480,Information Technology,speed,positive,Unbelievable speed! Our network issues were resolved instantly by ORG.,G0013
+481,Information Technology,speed,positive,ORG's support team is super quick and efficient. Highly recommend!,G0013
+482,Information Technology,speed,positive,Data migration with ORG was surprisingly swift. No downtime at all.,G0013
+483,Information Technology,speed,positive,We appreciate the prompt and speedy response from ORG every time.,G0013
+484,Information Technology,speed,positive,Blazing fast setup! ORG got our new systems running in record time.,G0013
+485,Information Technology,speed,positive,ORG delivered our project with impressive speed. Ahead of schedule!,G0013
+486,Information Technology,speed,positive,"Their technical support is always so quick and helpful. Thank you, ORG!",G0013
+487,Information Technology,speed,positive,Fantastic speed from ORG. Our website's performance is now amazing.,G0013
+488,Information Technology,speed,positive,The quick turnaround on our IT requests from ORG is outstanding.,G0013
+489,Information Technology,speed,positive,ORG provided incredibly rapid solutions. Saved us so much time!,G0013
+490,Information Technology,speed,positive,Speedy deployment of new software by ORG. Very smooth process.,G0013
+491,Information Technology,speed,positive,Always rely on ORG for their efficient and fast IT assistance.,G0013
+492,Information Technology,speed,negative,ORG's internet speed is absolutely abysmal. Constant buffering.,G0013
+493,Information Technology,speed,negative,Our network crawls. Unacceptable performance from ORG.,G0013
+494,Information Technology,speed,negative,Support response times from ORG are incredibly slow. Frustrating.,G0013
+495,Information Technology,speed,negative,Software updates from ORG take an eternity to download. Very slow.,G0013
+496,Information Technology,speed,negative,The website loads so slowly with ORG's hosting. It's a joke.,G0013
+497,Information Technology,speed,negative,ORG's system is always lagging. Productivity is plummeting.,G0013
+498,Information Technology,speed,negative,Their service is painfully slow. Wish we picked another provider.,G0013
+499,Information Technology,speed,negative,Data transfer speeds with ORG are a nightmare. So inefficient.,G0013
+500,Information Technology,speed,negative,"Why is everything so slow? ORG, fix your speed issues now!",G0013
+501,Information Technology,speed,negative,Waiting for ORG's support team feels like forever. No urgency.,G0013
+502,Information Technology,speed,negative,Our critical applications run at a snail's pace due to ORG.,G0013
+503,Information Technology,speed,negative,Website development by ORG took way too long. Poor speed.,G0013
+504,Information Technology,speed,negative,ORG's network connectivity is consistently slow and unreliable.,G0013
+505,Information Technology,speed,negative,Slow performance ruins our workflow. ORG isn't delivering.,G0013
+506,Information Technology,speed,negative,The deployment process was incredibly sluggish. Bad experience with ORG.,G0013
+507,Information Technology,speed,negative,Download speeds are terrible. ORG promised better service.,G0013
+508,Information Technology,speed,negative,ORG provides such slow internet. Can't stream anything properly.,G0013
+509,Information Technology,speed,negative,Everything takes ages to load. ORG's infrastructure is ancient.,G0013
+510,Information Technology,speed,negative,Their tech support is unresponsive. Slowest service ever experienced.,G0013
+511,Information Technology,speed,negative,Our systems are constantly bogged down by ORG's slow network.,G0013
+512,Information Technology,speed,negative,Switching to ORG was a mistake. Speeds are worse than before.,G0013
+513,Information Technology,speed,negative,"Slow, slow, slow. ORG needs to upgrade their servers ASAP.",G0013
+514,Information Technology,speed,negative,I spend more time waiting than working with ORG's services.,G0013
+515,Information Technology,speed,negative,The speed degradation since using ORG is unacceptable. Fix it!,G0013
+516,Information Technology,speed,negative,"Laggy software, slow connections. ORG offers terrible value.",G0013
+517,Information Technology,speed,negative,Never seen such slow data processing. ORG is a huge bottleneck.,G0013
+518,Information Technology,speed,neutral,ORG's service delivery speed was generally standard. Neither exceptionally fast nor slow.,G0013
+519,Information Technology,account-access,positive,Accessing my account with ORG is always so easy and quick!,G0014
+520,Information Technology,account-access,positive,"The account access system is incredibly secure and reliable. Thank you, ORG!",G0014
+521,Information Technology,account-access,positive,Logging into my ORG account is a seamless experience every time. Fantastic!,G0014
+522,Information Technology,account-access,positive,I love how intuitive the account access is. No more fumbling around!,G0014
+523,Information Technology,account-access,positive,Quick and efficient account access. ORG truly delivers on user experience.,G0014
+524,Information Technology,account-access,positive,Never had a problem accessing my account with ORG. Always smooth!,G0014
+525,Information Technology,account-access,positive,The security for account access is top-notch. Feeling very safe with ORG.,G0014
+526,Information Technology,account-access,positive,ORG's account access is simply the best. So convenient and fast.,G0014
+527,Information Technology,account-access,positive,"Effortless account access, every single time. ORG makes it easy.",G0014
+528,Information Technology,account-access,positive,Impressed with the reliability of ORG's account access. It just works!,G0014
+529,Information Technology,account-access,positive,Getting into my account is a breeze thanks to ORG. Highly recommend.,G0014
+530,Information Technology,account-access,positive,Seamless login experience. ORG's account access is truly outstanding.,G0014
+531,Information Technology,account-access,positive,"Fantastic account access! Secure and super user-friendly. Great job, ORG.",G0014
+532,Information Technology,account-access,positive,Always a quick login with ORG. Their account access is flawless.,G0014
+533,Information Technology,account-access,positive,I appreciate the robust security around my ORG account access. Peace of mind.,G0014
+534,Information Technology,account-access,positive,ORG's account access interface is so well-designed and easy to navigate.,G0014
+535,Information Technology,account-access,positive,No issues whatsoever with account access. ORG has nailed it!,G0014
+536,Information Technology,account-access,positive,Super fast and reliable account access. ORG is truly excellent.,G0014
+537,Information Technology,account-access,positive,Convenient and secure. ORG's account access is exactly what I needed.,G0014
+538,Information Technology,account-access,positive,The ease of account access provided by ORG is remarkable.,G0014
+539,Information Technology,account-access,positive,Wonderful experience with ORG's account access. Always accessible.,G0014
+540,Information Technology,account-access,positive,"Their account access is incredibly user-friendly. A joy to use, ORG!",G0014
+541,Information Technology,account-access,positive,ORG makes logging in simple and secure. Great account access.,G0014
+542,Information Technology,account-access,positive,"Always a smooth process getting into my account. Thanks, ORG!",G0014
+543,Information Technology,account-access,positive,"Top-tier account access from ORG. Secure, fast, and reliable.",G0014
+544,Information Technology,account-access,positive,Absolutely love the hassle-free account access with ORG. Saves so much time.,G0014
+545,Information Technology,account-access,positive,ORG's account access features are excellent. Never a delay.,G0014
+546,Information Technology,account-access,positive,Secure and swift account access. ORG clearly prioritizes its users.,G0014
+547,Information Technology,account-access,negative,Login is a nightmare. Constantly locked out of my ORG account.,G0014
+548,Information Technology,account-access,negative,Account access is incredibly frustrating. Always encountering errors.,G0014
+549,Information Technology,account-access,negative,Lost access to my ORG services. Support couldn't fix it promptly.,G0014
+550,Information Technology,account-access,negative,Password resets for ORG are a joke. Never works.,G0014
+551,Information Technology,account-access,negative,The account portal is terrible. Can't reliably log in anymore.,G0014
+552,Information Technology,account-access,negative,Why is ORG's account access so difficult? I'm locked out again!,G0014
+553,Information Technology,account-access,negative,My ORG account keeps getting suspended without reason. Unacceptable.,G0014
+554,Information Technology,account-access,negative,MFA for ORG access is overly complicated and often fails.,G0014
+555,Information Technology,account-access,negative,Horrible experience with ORG's account recovery process.,G0014
+556,Information Technology,account-access,negative,"Can't access my data. ORG's account security is a barrier, not a help.",G0014
+557,Information Technology,account-access,neutral,Need to check my ORG account status.,G0014
+558,Information Technology,account-access,neutral,Inquired about ORG account access options.,G0014
+559,Information Technology,attitude-of-staff,positive,The ORG team was so friendly and helpful. Always a pleasure to interact with them.,G0015
+560,Information Technology,attitude-of-staff,positive,Every ORG staff member displayed outstanding professionalism and courtesy. Truly exceptional.,G0015
+561,Information Technology,attitude-of-staff,positive,Absolutely thrilled with the consistently positive attitude of ORG employees.,G0015
+562,Information Technology,attitude-of-staff,positive,"ORG's staff are consistently patient and understanding. Excellent, supportive service.",G0015
+563,Information Technology,attitude-of-staff,positive,What a refreshing change! The ORG team is always cheerful and ready to assist.,G0015
+564,Information Technology,attitude-of-staff,positive,The staff's dedication at ORG truly shines through. They genuinely care about clients.,G0015
+565,Information Technology,attitude-of-staff,positive,Every ORG representative was attentive and respectful. Top-notch customer experience.,G0015
+566,Information Technology,attitude-of-staff,positive,Very impressed with the approachable and kind nature of the ORG support team.,G0015
+567,Information Technology,attitude-of-staff,positive,"Their positive outlook made our complex project a success. Thank you, ORG staff!",G0015
+568,Information Technology,attitude-of-staff,positive,"ORG staff are always willing to go the extra mile. Fantastic, helpful attitude!",G0015
+569,Information Technology,attitude-of-staff,positive,Such enthusiastic and supportive individuals at ORG. Highly recommend their service.,G0015
+570,Information Technology,attitude-of-staff,positive,The ORG team's polite and professional demeanor made every interaction easy.,G0015
+571,Information Technology,attitude-of-staff,positive,Always greeted with a smile and a helpful spirit by ORG staff. Wonderful team!,G0015
+572,Information Technology,attitude-of-staff,positive,Their understanding approach to our complex issues was truly appreciated. Great ORG team!,G0015
+573,Information Technology,attitude-of-staff,positive,The ORG crew's positive energy is infectious. A true pleasure to collaborate.,G0015
+574,Information Technology,attitude-of-staff,positive,"Everyone at ORG exhibited a superb, can-do attitude. Fantastic experience from start to finish!",G0015
+575,Information Technology,attitude-of-staff,positive,ORG's staff are incredibly supportive and professional. Best IT service around.,G0015
+576,Information Technology,attitude-of-staff,positive,Their helpful and friendly nature made problem-solving simple. Kudos to ORG's team!,G0015
+577,Information Technology,attitude-of-staff,positive,We deeply value the patient and dedicated staff at ORG. They are true assets.,G0015
+578,Information Technology,attitude-of-staff,positive,The ORG team's respectful communication made us feel valued. Highly recommend their service.,G0015
+579,Information Technology,attitude-of-staff,positive,"Always approachable, always eager to help. ORG has the best staff attitude!",G0015
+580,Information Technology,attitude-of-staff,positive,The cheerful and positive demeanor of ORG staff brightened our day. Excellent service.,G0015
+581,Information Technology,attitude-of-staff,positive,Consistently professional and genuinely kind. ORG's staff are truly exceptional.,G0015
+582,Information Technology,attitude-of-staff,positive,The understanding and patient approach from ORG personnel was fantastic. Highly recommend.,G0015
+583,Information Technology,attitude-of-staff,positive,Every ORG team member showed great enthusiasm and dedication. Wonderful experience overall.,G0015
+584,Information Technology,attitude-of-staff,positive,"Their helpfulness and positive spirit made a big difference. Thank you, ORG staff.",G0015
+585,Information Technology,attitude-of-staff,positive,ORG's staff are incredibly polite and respectful. A true pleasure to work with.,G0015
+586,Information Technology,attitude-of-staff,positive,"The support team at ORG always has a fantastic, can-do attitude. So reliable!",G0015
+587,Information Technology,attitude-of-staff,positive,We appreciate the attentive and kind service from every ORG employee. Stellar team!,G0015
+588,Information Technology,attitude-of-staff,positive,The friendly and professional staff at ORG made our transition seamless and stress-free.,G0015
+589,Information Technology,attitude-of-staff,negative,The staff at ORG were incredibly rude and unhelpful. Zero customer service.,G0015
+590,Information Technology,attitude-of-staff,negative,ORG's support team had a condescending attitude. Very disappointing experience.,G0015
+591,Information Technology,attitude-of-staff,negative,Their technicians at ORG were dismissive of my concerns. They seemed annoyed.,G0015
+592,Information Technology,attitude-of-staff,negative,Unprofessional staff made my interaction with ORG unpleasant. No patience whatsoever.,G0015
+593,Information Technology,attitude-of-staff,negative,I received arrogant responses from ORG's representatives. Won't be returning.,G0015
+594,Information Technology,attitude-of-staff,negative,Customer service at ORG was terrible; their team clearly didn't care.,G0015
+595,Information Technology,attitude-of-staff,negative,The ORG employee I spoke to had a truly awful attitude. Avoid this company.,G0015
+596,Information Technology,attitude-of-staff,negative,Extremely poor attitude from ORG's front desk. Made me feel unwelcome.,G0015
+597,Information Technology,attitude-of-staff,neutral,The ORG team was professional throughout our engagement. Their attitude was unremarkable.,G0015
+598,Information Technology,attitude-of-staff,neutral,Interactions with ORG's staff were standard. They got the job done as required.,G0015
