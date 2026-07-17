@@ -26,6 +26,7 @@ _SENTIMENT_ORDER = ["positive", "negative", "neutral"]
 def filter_data(
     df: pd.DataFrame,
     industry: str | None = None,
+    org: str | None = None,
     data_source: str | None = None,
     parent_aspect: str | None = None,
     child_aspect: str | None = None,
@@ -34,9 +35,11 @@ def filter_data(
     """Keep only rows matching all provided filters.
 
     Example: filter_data(df, industry="Banking", child_aspect="app-website")
+             filter_data(df, org="BankA", child_aspect="app-website")  # single org
     """
     mask = pd.Series(True, index=df.index)
     if industry is not None:     mask &= df["industry"] == industry
+    if org is not None:          mask &= df["org"] == org
     if data_source is not None:  mask &= df["data_source"] == data_source
     if parent_aspect is not None: mask &= df["parent_aspect"] == parent_aspect
     if child_aspect is not None: mask &= df["child_aspect"] == child_aspect
@@ -47,6 +50,7 @@ def filter_data(
 def exclude(
     df: pd.DataFrame,
     industry: str | None = None,
+    org: str | None = None,
     data_source: str | None = None,
     parent_aspect: str | None = None,
     child_aspect: str | None = None,
@@ -55,9 +59,11 @@ def exclude(
     """Drop rows matching all provided filters (inverse of filter_data).
 
     Example: exclude(banking_slice, industry="Banking")  # everything except Banking
+             exclude(banking_slice, org="BankA")         # Banking peers of BankA
     """
     mask = pd.Series(True, index=df.index)
     if industry is not None:     mask &= df["industry"] == industry
+    if org is not None:          mask &= df["org"] == org
     if data_source is not None:  mask &= df["data_source"] == data_source
     if parent_aspect is not None: mask &= df["parent_aspect"] == parent_aspect
     if child_aspect is not None: mask &= df["child_aspect"] == child_aspect
@@ -111,6 +117,23 @@ def add_shares(breakdown_df: pd.DataFrame) -> pd.DataFrame:
     df["pos_share"] = (df["positive"] / total).fillna(0).round(3)
     df["neg_share"] = (df["negative"] / total).fillna(0).round(3)
     df["neu_share"] = (df["neutral"]  / total).fillna(0).round(3)
+    return df
+
+
+def add_priority(breakdown_df: pd.DataFrame) -> pd.DataFrame:
+    """Add a `priority` score combining complaint volume and severity (0-2 scale).
+
+    priority = min-max normalised total volume + min-max normalised neg_share, so an
+    aspect scores high only when it is BOTH high-volume and high-severity — the
+    'prioritisation quadrant'. Requires neg_share (from add_shares) and total columns.
+
+    Example: add_priority(add_shares(sentiment_breakdown(df, "child_aspect")))
+    """
+    df = breakdown_df.copy()
+    def _norm(s):
+        rng = s.max() - s.min()
+        return (s - s.min()) / rng if rng else s * 0.0
+    df["priority"] = (_norm(df["total"]) + _norm(df["neg_share"])).round(3)
     return df
 
 

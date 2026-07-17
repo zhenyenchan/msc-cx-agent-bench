@@ -35,11 +35,13 @@ def _validate(field: str, value, valid) -> None:
         raise ValueError(f"Invalid {field}: '{value}'. Must be one of: {valid}")
 
 
-def _build_mask(df, org_index, industry, data_source, parent_aspect, child_aspect, sentiment):
+def _build_mask(df, org_index, industry, data_source, parent_aspect, child_aspect, sentiment, org=None):
     """Build a boolean mask that is True where all provided filters match."""
     mask = pd.Series(True, index=df.index)
     if org_index is not None:
         mask &= df["org_index"] == org_index
+    if org is not None:
+        mask &= df["org"] == org
     if industry is not None:
         _validate("industry", industry, VALID_INDUSTRIES)
         mask &= df["industry"] == industry
@@ -68,6 +70,7 @@ def filter_data(
     parent_aspect: str | None = None,
     child_aspect: str | None = None,
     sentiment: str | None = None,
+    org: str | None = None,
 ) -> pd.DataFrame:
     """Keep only rows matching all provided filters.
 
@@ -75,8 +78,9 @@ def filter_data(
     matching rows (same columns as input).
 
     Example: filter_data(df, industry="Banking", child_aspect="app-website")
+             filter_data(df, org="BankA", child_aspect="app-website")  # single org
     """
-    mask = _build_mask(df, org_index, industry, data_source, parent_aspect, child_aspect, sentiment)
+    mask = _build_mask(df, org_index, industry, data_source, parent_aspect, child_aspect, sentiment, org)
     return df[mask].copy()
 
 
@@ -88,6 +92,7 @@ def exclude(
     parent_aspect: str | None = None,
     child_aspect: str | None = None,
     sentiment: str | None = None,
+    org: str | None = None,
 ) -> pd.DataFrame:
     """Drop rows matching all provided filters (inverse of filter_data).
 
@@ -95,10 +100,11 @@ def exclude(
     Requires at least one filter.
 
     Example: exclude(banking_slice, org_index=514)  # peers only
+             exclude(banking_slice, org="BankA")    # Banking peers of BankA
     """
-    if all(v is None for v in [org_index, industry, data_source, parent_aspect, child_aspect, sentiment]):
+    if all(v is None for v in [org_index, industry, data_source, parent_aspect, child_aspect, sentiment, org]):
         raise ValueError("exclude requires at least one filter")
-    mask = _build_mask(df, org_index, industry, data_source, parent_aspect, child_aspect, sentiment)
+    mask = _build_mask(df, org_index, industry, data_source, parent_aspect, child_aspect, sentiment, org)
     return df[~mask].copy()
 
 
@@ -153,6 +159,23 @@ def add_shares(breakdown_df: pd.DataFrame) -> pd.DataFrame:
     df["pos_share"] = (df["positive"] / total).fillna(0).round(3)
     df["neg_share"] = (df["negative"] / total).fillna(0).round(3)
     df["neu_share"] = (df["neutral"] / total).fillna(0).round(3)
+    return df
+
+
+def add_priority(breakdown_df: pd.DataFrame) -> pd.DataFrame:
+    """Add a `priority` score combining complaint volume and severity (0-2 scale).
+
+    priority = min-max normalised total volume + min-max normalised neg_share, so an
+    aspect scores high only when it is BOTH high-volume and high-severity — the
+    'prioritisation quadrant'. Requires neg_share (from add_shares) and total columns.
+
+    Example: add_priority(add_shares(sentiment_breakdown(df, "child_aspect")))
+    """
+    df = breakdown_df.copy()
+    def _norm(s):
+        rng = s.max() - s.min()
+        return (s - s.min()) / rng if rng else s * 0.0
+    df["priority"] = (_norm(df["total"]) + _norm(df["neg_share"])).round(3)
     return df
 
 
