@@ -9,7 +9,8 @@ Data flow examples:
     apply_min_volume               -> volume guard              (returns DataFrame)
     rank_top                       -> sort and select           (returns DataFrame)
     share_of / two_prop_test       -> scalar summaries & stats  (returns dict)
-    sample_reviews                 -> verbatim evidence         (returns list[dict])
+
+sample_reviews (verbatim evidence) is disabled: the corpus is labels-only, with no review text.
 """
 
 import math
@@ -227,23 +228,25 @@ def chi_squared(df_a: pd.DataFrame, df_b: pd.DataFrame) -> dict:
 
 # ---- Evidence ----
 
-def sample_reviews(
-    df: pd.DataFrame,
-    n: int = 3,
-    random_state: int = 42,
-) -> list[dict]:
-    """Return n example reviews for verbatim evidence.
-
-    Example: sample_reviews(negative_appweb_slice, n=3)
-    """
-    if len(df) == 0:
-        return []
-    sampled = df.sample(min(n, len(df)), random_state=random_state)
-    return [
-        {
-            "text": row["text"][:300],
-            "child_aspect": row["child_aspect"],
-            "sentiment": row["sentiment"],
-        }
-        for _, row in sampled.iterrows()
-    ]
+# DISABLED: the benchmark corpus is labels-only (no review text), so this tool has nothing to read.
+# Kept commented rather than deleted in case review text is reinstated.
+# def sample_reviews(
+#     df: pd.DataFrame,
+#     n: int = 3,
+#     random_state: int = 42,
+# ) -> list[dict]:
+#     """Return n example reviews for verbatim evidence.
+#
+#     Example: sample_reviews(negative_appweb_slice, n=3)
+#     """
+#     if len(df) == 0:
+#         return []
+#     sampled = df.sample(min(n, len(df)), random_state=random_state)
+#     return [
+#         {
+#             "text": row["text"][:300],
+#             "child_aspect": row["child_aspect"],
+#             "sentiment": row["sentiment"],
+#         }
+#         for _, row in sampled.iterrows()
+#     ]

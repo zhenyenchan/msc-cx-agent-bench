@@ -4,8 +4,10 @@ Data-source tools (filter_data, exclude, count_by, sentiment_breakdown) read
 from the FABSA DataFrame loaded at startup.
 
 Chainable tools (add_shares, add_polarisation, apply_min_volume, rank_top,
-share_of, chi_squared, sample_reviews) accept list[dict] inputs so results
-can be piped between tool calls over MCP's JSON transport.
+share_of, chi_squared) accept list[dict] inputs so results can be piped
+between tool calls over MCP's JSON transport.
+
+sample_reviews is disabled and not registered: the corpus is labels-only.
 """
 import os
 import pandas as pd
@@ -166,19 +168,22 @@ def chi_squared(rows_a: list[dict], rows_b: list[dict]) -> dict:
 
 # ---------------- Evidence ----------------
 
-@mcp.tool()
-def sample_reviews(
-    rows: list[dict],
-    n: int = 3,
-    random_state: int = 42,
-) -> list[dict]:
-    """Return n example reviews from a slice for verbatim evidence. Each
-    entry has text (truncated to 300 chars), parent_aspect, child_aspect,
-    sentiment.
-
-    Example: sample_reviews(negative_appweb_rows, n=3)
-    """
-    return tools.sample_reviews(pd.DataFrame(rows), n, random_state)
+# DISABLED: the benchmark corpus is labels-only (no review text). The @mcp.tool() registration is
+# commented out, so this tool is not advertised to the agent and cannot be called -- run_benchmark
+# allows mcp__fabsa__*, which only covers tools this server actually registers.
+# @mcp.tool()
+# def sample_reviews(
+#     rows: list[dict],
+#     n: int = 3,
+#     random_state: int = 42,
+# ) -> list[dict]:
+#     """Return n example reviews from a slice for verbatim evidence. Each
+#     entry has text (truncated to 300 chars), parent_aspect, child_aspect,
+#     sentiment.
+#
+#     Example: sample_reviews(negative_appweb_rows, n=3)
+#     """
+#     return tools.sample_reviews(pd.DataFrame(rows), n, random_state)
 
 
 if __name__ == "__main__":

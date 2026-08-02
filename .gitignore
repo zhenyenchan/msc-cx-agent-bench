@@ -29,4 +29,5 @@ agent_sandbox/*.json
 !agent_sandbox/.mcp.json
 scratch.json
 old_bench_builder.ipynb
+old_data_generation.ipynb
 benchmark_outputs/
