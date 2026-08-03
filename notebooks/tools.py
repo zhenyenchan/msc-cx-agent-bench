@@ -28,7 +28,6 @@ def filter_data(
     df: pd.DataFrame,
     industry: str | None = None,
     org: str | None = None,
-    data_source: str | None = None,
     parent_aspect: str | None = None,
     child_aspect: str | None = None,
     sentiment: str | None = None,
@@ -41,7 +40,6 @@ def filter_data(
     mask = pd.Series(True, index=df.index)
     if industry is not None:     mask &= df["industry"] == industry
     if org is not None:          mask &= df["org"] == org
-    if data_source is not None:  mask &= df["data_source"] == data_source
     if parent_aspect is not None: mask &= df["parent_aspect"] == parent_aspect
     if child_aspect is not None: mask &= df["child_aspect"] == child_aspect
     if sentiment is not None:    mask &= df["sentiment"] == sentiment
@@ -52,7 +50,6 @@ def exclude(
     df: pd.DataFrame,
     industry: str | None = None,
     org: str | None = None,
-    data_source: str | None = None,
     parent_aspect: str | None = None,
     child_aspect: str | None = None,
     sentiment: str | None = None,
@@ -65,7 +62,6 @@ def exclude(
     mask = pd.Series(True, index=df.index)
     if industry is not None:     mask &= df["industry"] == industry
     if org is not None:          mask &= df["org"] == org
-    if data_source is not None:  mask &= df["data_source"] == data_source
     if parent_aspect is not None: mask &= df["parent_aspect"] == parent_aspect
     if child_aspect is not None: mask &= df["child_aspect"] == child_aspect
     if sentiment is not None:    mask &= df["sentiment"] == sentiment

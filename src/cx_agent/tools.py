@@ -19,7 +19,6 @@ from scipy import stats
 
 from cx_agent.data import (
     VALID_INDUSTRIES,
-    VALID_DATA_SOURCES,
     VALID_PARENT_ASPECTS,
     VALID_CHILD_ASPECTS,
     VALID_SENTIMENTS,
@@ -36,7 +35,7 @@ def _validate(field: str, value, valid) -> None:
         raise ValueError(f"Invalid {field}: '{value}'. Must be one of: {valid}")
 
 
-def _build_mask(df, org_index, industry, data_source, parent_aspect, child_aspect, sentiment, org=None):
+def _build_mask(df, org_index, industry, parent_aspect, child_aspect, sentiment, org=None):
     """Build a boolean mask that is True where all provided filters match."""
     mask = pd.Series(True, index=df.index)
     if org_index is not None:
@@ -46,9 +45,6 @@ def _build_mask(df, org_index, industry, data_source, parent_aspect, child_aspec
     if industry is not None:
         _validate("industry", industry, VALID_INDUSTRIES)
         mask &= df["industry"] == industry
-    if data_source is not None:
-        _validate("data_source", data_source, VALID_DATA_SOURCES)
-        mask &= df["data_source"] == data_source
     if parent_aspect is not None:
         _validate("parent_aspect", parent_aspect, VALID_PARENT_ASPECTS)
         mask &= df["parent_aspect"] == parent_aspect
@@ -67,7 +63,6 @@ def filter_data(
     df: pd.DataFrame,
     org_index: int | None = None,
     industry: str | None = None,
-    data_source: str | None = None,
     parent_aspect: str | None = None,
     child_aspect: str | None = None,
     sentiment: str | None = None,
@@ -81,7 +76,7 @@ def filter_data(
     Example: filter_data(df, industry="Banking", child_aspect="app-website")
              filter_data(df, org="BankA", child_aspect="app-website")  # single org
     """
-    mask = _build_mask(df, org_index, industry, data_source, parent_aspect, child_aspect, sentiment, org)
+    mask = _build_mask(df, org_index, industry, parent_aspect, child_aspect, sentiment, org)
     return df[mask].copy()
 
 
@@ -89,7 +84,6 @@ def exclude(
     df: pd.DataFrame,
     org_index: int | None = None,
     industry: str | None = None,
-    data_source: str | None = None,
     parent_aspect: str | None = None,
     child_aspect: str | None = None,
     sentiment: str | None = None,
@@ -103,9 +97,9 @@ def exclude(
     Example: exclude(banking_slice, org_index=514)  # peers only
              exclude(banking_slice, org="BankA")    # Banking peers of BankA
     """
-    if all(v is None for v in [org_index, industry, data_source, parent_aspect, child_aspect, sentiment, org]):
+    if all(v is None for v in [org_index, industry, parent_aspect, child_aspect, sentiment, org]):
         raise ValueError("exclude requires at least one filter")
-    mask = _build_mask(df, org_index, industry, data_source, parent_aspect, child_aspect, sentiment, org)
+    mask = _build_mask(df, org_index, industry, parent_aspect, child_aspect, sentiment, org)
     return df[~mask].copy()
 
 

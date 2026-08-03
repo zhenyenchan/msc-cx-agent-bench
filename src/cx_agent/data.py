@@ -14,8 +14,6 @@ VALID_INDUSTRIES = [
     "Streaming", "Trading", "Travel Booking",
 ]
 
-VALID_DATA_SOURCES = ["Trustpilot", "Google Play", "Apple Store"]
-
 VALID_PARENT_ASPECTS = [
     "company-brand", "logistics-rides", "online-experience",
     "purchase-booking-experience", "staff-support", "value",

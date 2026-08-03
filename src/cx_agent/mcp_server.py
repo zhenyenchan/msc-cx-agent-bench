@@ -27,7 +27,6 @@ mcp = FastMCP("fabsa")
 def filter_data(
     org_index: int | None = None,
     industry: str | None = None,
-    data_source: str | None = None,
     parent_aspect: str | None = None,
     child_aspect: str | None = None,
     sentiment: str | None = None,
@@ -38,7 +37,7 @@ def filter_data(
     Example: filter_data(industry="Banking", child_aspect="app-website")
     """
     return tools.filter_data(
-        DF, org_index, industry, data_source,
+        DF, org_index, industry,
         parent_aspect, child_aspect, sentiment,
     ).to_dict("records")
 
@@ -48,7 +47,6 @@ def exclude(
     rows: list[dict],
     org_index: int | None = None,
     industry: str | None = None,
-    data_source: str | None = None,
     parent_aspect: str | None = None,
     child_aspect: str | None = None,
     sentiment: str | None = None,
@@ -59,7 +57,7 @@ def exclude(
     Example: exclude(banking_rows, org_index=514)  # peers only
     """
     return tools.exclude(
-        pd.DataFrame(rows), org_index, industry, data_source,
+        pd.DataFrame(rows), org_index, industry,
         parent_aspect, child_aspect, sentiment,
     ).to_dict("records")
 

@@ -12,7 +12,8 @@
       "Bash(node scripts/validate_palette.js \"#2a78d6,#eb6834,#1baf7a\" --mode light --pairs all)",
       "Bash(/c/Users/User/miniconda3/python.exe -c ' *)",
       "Bash(/c/Users/User/miniconda3/python.exe -W error::UserWarning -c ' *)",
-      "Bash(C:/Users/User/miniconda3/python.exe \"C:/Users/User/AppData/Local/Temp/claude/c--msc-cx-agent-bench/1c083517-2b02-45d6-b344-81f9ff6833d6/scratchpad/run_steps123.py\")"
+      "Bash(C:/Users/User/miniconda3/python.exe \"C:/Users/User/AppData/Local/Temp/claude/c--msc-cx-agent-bench/1c083517-2b02-45d6-b344-81f9ff6833d6/scratchpad/run_steps123.py\")",
+      "Bash(\"C:/Users/User/miniconda3/python.exe\" t5_candidates.py)"
     ]
   }
 }

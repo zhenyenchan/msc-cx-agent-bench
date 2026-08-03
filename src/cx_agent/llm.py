@@ -51,7 +51,6 @@ RESPONSE FORMAT for your final answer:
 
 Valid filter values:
 - industry: Banking, Consulting, Fashion, Groceries, Information Technology, Price Comparison, Ride Hailing, Streaming, Trading, Travel Booking
-- data_source: Trustpilot, Google Play, Apple Store
 - parent_aspect: company-brand, logistics-rides, online-experience, purchase-booking-experience, staff-support, value, account-management
 - child_aspect: account-access, app-website, attitude-of-staff, competitor, discounts-promotions, ease-of-use, email, general-satisfaction, phone, price-value-for-money, reviews, speed
 - sentiment: positive, negative, neutral
@@ -69,16 +68,12 @@ TOOL_DEFINITIONS = [
                 "properties": {
                     "group_by": {
                         "type": "string",
-                        "enum": ["child_aspect", "parent_aspect", "industry", "data_source"],
+                        "enum": ["child_aspect", "parent_aspect", "industry"],
                         "description": "Dimension to group results by. Default: child_aspect",
                     },
                     "industry": {
                         "type": "string",
                         "description": "Filter by industry name",
-                    },
-                    "data_source": {
-                        "type": "string",
-                        "description": "Filter by data source",
                     },
                     "parent_aspect": {
                         "type": "string",
@@ -112,7 +107,7 @@ TOOL_DEFINITIONS = [
                 "properties": {
                     "compare_field": {
                         "type": "string",
-                        "enum": ["child_aspect", "parent_aspect", "industry", "data_source"],
+                        "enum": ["child_aspect", "parent_aspect", "industry"],
                         "description": "The dimension to compare across",
                     },
                     "group_a": {
@@ -127,10 +122,6 @@ TOOL_DEFINITIONS = [
                         "type": "string",
                         "description": "Optional: filter both groups by industry",
                     },
-                    "data_source": {
-                        "type": "string",
-                        "description": "Optional: filter both groups by data source",
-                    },
                 },
                 "required": ["compare_field", "group_a", "group_b"],
             },
@@ -140,17 +131,13 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "report",
-            "description": "Generate a structured summary report for a given scope. Use for questions like: 'Give me a summary report for Fashion', 'Summarise feedback from Google Play'",
+            "description": "Generate a structured summary report for a given scope. Use for questions like: 'Give me a summary report for Fashion', 'Summarise feedback for Travel Booking'",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "industry": {
                         "type": "string",
                         "description": "Filter by industry name",
-                    },
-                    "data_source": {
-                        "type": "string",
-                        "description": "Filter by data source",
                     },
                 },
                 "required": [],

@@ -17,6 +17,7 @@ env/
 .coverage.*
 .mypy_cache/
 .ruff_cache/
+.claude/
 
 # Jupyter
 .ipynb_checkpoints
@@ -29,5 +30,7 @@ agent_sandbox/*.json
 !agent_sandbox/.mcp.json
 scratch.json
 old_bench_builder.ipynb
+old_bench_builder_v1.ipynb
 old_data_generation.ipynb
 benchmark_outputs/
+.claude/settings.json
