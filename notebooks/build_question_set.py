@@ -71,7 +71,8 @@ ASPECT = {
 # question names (a negative rate, a complaint count, or a full breakdown).
 RANKED = "all 12 (ranked across)"
 ALL_SENT = "all (breakdown)"
-ASPECT_ROLE = {"T3": RANKED, "T7": RANKED, "T8": RANKED, "T9": RANKED, "T10": RANKED}
+ASPECT_ROLE = {"T2": "all 12 (not filtered)", "T3": RANKED, "T7": RANKED, "T8": RANKED,
+               "T9": RANKED, "T10": RANKED}
 SENTIMENT_ROLE = {"T2": ALL_SENT, "T3": "negative", "T6": "negative", "T7": "negative",
                   "T8": "negative", "T9": "negative",
                   "T10": "all (overview), negative (drivers)"}
@@ -82,25 +83,31 @@ TASK_TYPE = {**{t: "Descriptive" for t in ("T1", "T2", "T3")},
 
 TEMPLATES = {
     "T1": ("T1- Single value retrieval",
-           "What proportion of {seg} reviews about {aspect} are {sent}?"),
+           "What proportion of {seg} reviews that mention {aspect} are {sent}?"),
     "T2": ("T2- Distribution",
-           "What is the sentiment breakdown of {seg} reviews about {aspect}?"),
+           "What is the sentiment breakdown across all {seg} reviews?"),
     "T3": ("T3- Ranking by volume",
-           "What are the top 3 issues that {seg} customers complain about most, by number of negative reviews?"),
+           "What are the top 3 topics with the most number of complaints in {seg}?"),
     "T4": ("T4- Cross-segment comparison",
-           "Do a higher proportion of {a} or {b} reviews about {aspect} have {sent} sentiment?"),
+           "Is {sent} sentiment about {aspect} higher in {a} or {b}?"),
     "T5": ("T5- Statistical testing",
-           "Is the difference in the {sent} rate for {aspect} between {a} and {b} statistically significant?"),
+           "Do {a} and {b} have significantly different {sent} rates for {aspect}?"),
     "T6": ("T6- Organisation vs industry comparison",
-           "How much do individual organisations in {seg} vary around the industry average negative rate for {aspect}?"),
+           "How do individual organisations in {seg} compare to the industry average on {aspect}?"
+           " Give me each organisation's negative rate and ignore any organisations with less than"
+           " 30 mentions about {aspect}."),
     "T7": ("T7- Driver identification by severity",
-           "What is the single biggest driver of dissatisfaction at {seg}, by the proportion of negative reviews about each topic?"),
+           "What is the biggest driver of dissatisfaction at {seg}? Rank topics by negative rate"
+           " and ignore any topics with less than 30 mentions."),
     "T8": ("T8- Prioritisation by a named rule",
-           "Which 2 issues should {seg} address first? Prioritise topics with both a high proportion and a high volume of negative reviews."),
+           "Which 2 issues should {seg} address first? Consider both negative rate and volume"
+           " equally, and ignore any topics with fewer than 30 mentions."),
     "T9": ("T9- Comparative diagnosis and recommendation",
            "Why does {a} have a higher complaint rate than {b}? What should {a} improve first?"),
     "T10": ("T10- Full CX report",
-            "Write a CX report for {seg}. Cover overall sentiment, top pain points, and how the top issue compares with the {industry} industry average. Also give me a prioritised improvement roadmap."),
+            "Write a CX report for {seg}. Cover overall sentiment, top pain points ranked by"
+            " negative rate, and how the top issue compares with the industry average. Also give"
+            " me a prioritised improvement roadmap."),
 }
 
 # template -> (n easy, n hard answerable, n hard abstention, abstention reason)
@@ -126,11 +133,12 @@ ROWS = [
  ("T1", "hard", "H", dict(seg="Price Comparison", aspect="attitude-of-staff", sent="negative")),
  ("T1", "hard", LOW_N, dict(seg="Ride Hailing", aspect="discounts-promotions", sent="negative")),
 
- ("T2", "easy", "E", dict(seg="Marbrook", aspect="general-satisfaction")),
- ("T2", "easy", "E", dict(seg="Streamly", aspect="email")),
- ("T2", "hard", "H", dict(seg="Vanter Financial", aspect="ease-of-use")),
- ("T2", "hard", "H", dict(seg="PricePilot", aspect="attitude-of-staff")),
- ("T2", "hard", "H", dict(seg="Sable Row", aspect="general-satisfaction")),
+ # T2 breaks the whole segment down by sentiment, so the aspect is not a parameter here
+ ("T2", "easy", "E", dict(seg="Ride Hailing")),
+ ("T2", "easy", "E", dict(seg="Marbrook")),
+ ("T2", "hard", "H", dict(seg="Vanter Financial")),
+ ("T2", "hard", "H", dict(seg="PricePilot")),
+ ("T2", "hard", "H", dict(seg="Sable Row")),
 
  ("T3", "easy", "E", dict(seg="Travel Booking")),
  ("T3", "easy", "E", dict(seg="Groceries")),
@@ -290,9 +298,12 @@ def render(tpl, p):
 
 def evidence(tpl, mode, p):
     """(evidence note, answerable) for a parameter set."""
-    if tpl in ("T1", "T2"):
+    if tpl == "T1":
         n = n_cell(mode, p["seg"], p["aspect"])
         return f'n({p["seg"]} x {p["aspect"]})={n}', n >= MIN_N
+    if tpl == "T2":
+        n = n_cell(mode, p["seg"])
+        return f'n({p["seg"]})={n}', n >= MIN_N
     if tpl in ("T4", "T5"):
         na, nb = n_cell(mode, p["a"], p["aspect"]), n_cell(mode, p["b"], p["aspect"])
         return f'n({p["a"]})={na}, n({p["b"]})={nb}', na >= MIN_N and nb >= MIN_N
@@ -353,7 +364,7 @@ def check_reason(tpl, mode, p, reason):
 
 
 # ---- build ----
-grid, meta, slot = {}, [], {}
+meta, slot = [], {}
 for tpl, mode, kind, p in ROWS:
     letter = "E" if kind == "E" else "H"  # slots are numbered within difficulty, per the task spec
     slot[tpl, letter] = slot.get((tpl, letter), 0) + 1
@@ -365,7 +376,6 @@ for tpl, mode, kind, p in ROWS:
     extra = check_reason(tpl, mode, p, kind) if is_abstention else ""
     if "design" in p:
         extra = check_design(tpl, mode, p)
-    grid.setdefault(tpl, []).append(q)
     meta.append(dict(
         task_id=f"{tpl}-{letter}{slot[tpl, letter]}",
         task_type=TASK_TYPE[tpl], template=TEMPLATES[tpl][0], dataset=mode,
@@ -389,13 +399,9 @@ for tpl, (n_e, n_h, n_a, reason) in DISTRIBUTION.items():
 # ---- write ----
 with open(OUT + r"\question_set_v2.csv", "w", newline="", encoding="utf-8-sig") as f:
     w = csv.writer(f)
-    w.writerow(["Task type", "Template", "Easy question 1", "Easy question 2",
-                "Hard question 1", "Hard question 2", "Hard question 3",
-                "Hard abstention slots"])
-    for tpl in TEMPLATES:
-        n_a = DISTRIBUTION[tpl][2]
-        slots = ", ".join(f"Hard question {i}" for i in range(4 - n_a, 4)) if n_a else "none"
-        w.writerow([TASK_TYPE[tpl], TEMPLATES[tpl][0]] + grid[tpl] + [slots])
+    w.writerow(["task_id", "template", "question"])
+    for m in meta:
+        w.writerow([m["task_id"], m["template"], m["question"]])
 
 pd.DataFrame(meta).to_csv(OUT + r"\question_set_v2_params.csv", index=False, encoding="utf-8-sig")
 
