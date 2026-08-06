@@ -32,5 +32,6 @@ scratch.json
 old_bench_builder.ipynb
 old_bench_builder_v1.ipynb
 old_data_generation.ipynb
+old_manual_answers.ipynb
 benchmark_outputs/
 .claude/settings.json

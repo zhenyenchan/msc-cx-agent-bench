@@ -100,8 +100,8 @@ TEMPLATES = {
            "What is the biggest driver of dissatisfaction at {seg}? Rank topics by negative rate"
            " and ignore any topics with less than 30 mentions."),
     "T8": ("T8- Prioritisation by a named rule",
-           "Which 2 issues should {seg} address first? Consider both negative rate and volume"
-           " equally, and ignore any topics with fewer than 30 mentions."),
+           "Which 2 issues should {seg} address first? Define Priority = 0.5 x minmax(negative rate)"
+           " + 0.5 x minmax(volume) and ignore any topics with fewer than 30 mentions."),
     "T9": ("T9- Comparative diagnosis and recommendation",
            "Why does {a} have a higher complaint rate than {b}? What should {a} improve first?"),
     "T10": ("T10- Full CX report",
