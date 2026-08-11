@@ -173,6 +173,10 @@ class Tools:
         top_k=None returns every row, ordered.
         """
         args = {k: v for k, v in locals().items() if k != "self" and v is not None}
+        # top_k is the one argument whose None is not "unset": it means the whole ranking,
+        # while omitting it means the top 3. Log it either way, so a trajectory cannot be
+        # read as asking for one when it asked for the other.
+        args["top_k"] = top_k
         table = self._get(ref)
         if table is None:
             return self._log("rank", args, {"error": f"no table called '{ref}'"})
