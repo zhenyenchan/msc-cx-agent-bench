@@ -1,0 +1,98 @@
+"""R4, R6–R8, R11: protocol enforcement and trace format, exercised offline.
+
+A scripted agent (same interface as OllamaAgent/DummyAgent) drives the harness
+without a model, so handle validation, structured error observations, the single
+terminal action, the step cap and the JSONL trace shape are all testable in CI.
+"""
+
+import json
+
+from cx_agent_bench.agents import AgentStep, DummyAgent, ToolCallReq
+from cx_agent_bench.harness import run_task
+from cx_agent_bench.scoring import agent_canonical_json, read_trace
+from cx_agent_bench.tasks_public import load_public_tasks
+
+TASK = next(t for t in load_public_tasks() if t["task_id"] == "T1-E1")
+
+STEP_FIELDS = {"idx", "tool", "args", "handle", "canonical_signature", "output",
+               "status", "tokens_in", "tokens_out", "latency_s", "raw_response"}
+
+
+class ScriptedAgent:
+    """Replays a fixed list of AgentSteps through the standard agent interface."""
+
+    def __init__(self, steps):
+        self.steps = iter(steps)
+        self.agent_id, self.model = "scripted", "scripted"
+        self.temperature, self.seed = 0.0, 0
+
+    def model_digest(self):
+        return None
+
+    def step(self, messages, tool_schemas):
+        return next(self.steps)
+
+
+def _run(agent, tmp_path, **kw):
+    trace = run_task(agent, TASK, tmp_path, **kw)
+    return read_trace(trace)
+
+
+def test_dummy_agent_runs_through_identical_harness(tmp_path):
+    start, steps, end = _run(DummyAgent(mode="null"), tmp_path)
+    assert start["task_id"] == "T1-E1" and start["agent_id"] == "dummy-null"
+    assert [s["tool"] for s in steps] == ["answer"]
+    assert STEP_FIELDS <= set(steps[0])
+    assert end["terminal_state"] == "submitted"
+    assert end["final_answer"] == {"text": "", "abstain": False}
+
+
+def test_invented_handle_is_a_protocol_violation(tmp_path):
+    agent = ScriptedAgent([
+        AgentStep(tool_calls=[ToolCallReq("summarise", {"ref": "s99"})]),
+        AgentStep(tool_calls=[ToolCallReq("answer", {"text": "done"})]),
+    ])
+    _, steps, end = _run(agent, tmp_path)
+    assert steps[0]["status"] == "error"
+    assert steps[0]["protocol_violation"] is True
+    assert steps[0]["output"]["status"] == "error"          # structured, not raised
+    assert end["terminal_state"] == "submitted"             # the loop continued
+
+
+def test_unknown_tool_and_bad_args_come_back_as_observations(tmp_path):
+    agent = ScriptedAgent([
+        AgentStep(tool_calls=[ToolCallReq("plot", {})]),
+        AgentStep(tool_calls=[ToolCallReq("filter", {"nonsense": 1})]),
+        AgentStep(tool_calls=[ToolCallReq("answer", {"text": "done"})]),
+    ])
+    _, steps, end = _run(agent, tmp_path)
+    assert [s["status"] for s in steps] == ["error", "error", "ok"]
+    assert steps[0]["protocol_violation"] is True           # unknown tool
+    assert steps[1]["protocol_violation"] is False          # malformed args only
+    assert end["terminal_state"] == "submitted"
+
+
+def test_step_cap_terminates_run(tmp_path):
+    agent = ScriptedAgent([AgentStep(tool_calls=[ToolCallReq("filter",
+                                                             {"industry": "Banking"})])
+                           for _ in range(10)])
+    _, steps, end = _run(agent, tmp_path, step_cap=3)
+    assert len(steps) == 3
+    assert end["terminal_state"] == "step_cap"
+
+
+def test_trace_is_valid_jsonl_and_canonicalises(tmp_path):
+    agent = ScriptedAgent([
+        AgentStep(tool_calls=[ToolCallReq("filter", {"industry": "Banking",
+                                                     "aspect": "app-website"})]),
+        AgentStep(tool_calls=[ToolCallReq("summarise", {"ref": "s1"})]),
+        AgentStep(tool_calls=[ToolCallReq("answer", {"text": "18.7%"})]),
+    ])
+    trace = run_task(agent, TASK, tmp_path)
+    lines = [json.loads(l) for l in trace.read_text(encoding="utf-8").splitlines()]
+    assert [l["type"] for l in lines] == ["run_start", "step", "step", "step",
+                                          "run_end"]
+    _, steps, _ = read_trace(trace)
+    # ref expanded into the producing step's signature, per the shared normal form
+    assert steps[1]["canonical_signature"]["args"]["ref"]["tool"] == "filter"
+    assert json.loads(agent_canonical_json(steps))[0]["tool"] == "filter"

@@ -1,0 +1,51 @@
+﻿task_id,dataset,question
+T1-E1,easy,What proportion of Banking reviews that mention the app or website are negative?
+T1-E2,easy,What proportion of Fashion reviews that mention ease of use are positive?
+T1-H1,hard,What proportion of Fashion reviews that mention speed are negative?
+T1-H2,hard,What proportion of Price Comparison reviews that mention staff attitude are negative?
+T1-H3,hard,What proportion of Ride Hailing reviews that mention discounts and promotions are negative?
+T2-E1,easy,What is the sentiment breakdown across all Ride Hailing reviews?
+T2-E2,easy,What is the sentiment breakdown across all Marbrook reviews?
+T2-H1,hard,What is the sentiment breakdown across all Vanter Financial reviews?
+T2-H2,hard,What is the sentiment breakdown across all PricePilot reviews?
+T2-H3,hard,What is the sentiment breakdown across all Sable Row reviews?
+T3-E1,easy,What are the top 3 topics with the most number of complaints in Travel Booking?
+T3-E2,easy,What are the top 3 topics with the most number of complaints in Groceries?
+T3-H1,hard,What are the top 3 topics with the most number of complaints in Fashion?
+T3-H2,hard,What are the top 3 topics with the most number of complaints in Price Comparison?
+T3-H3,hard,What are the top 3 topics with the most number of complaints in Consulting?
+T4-E1,easy,"Looking only at reviews about price and value for money, is the negative sentiment rate higher in Banking or Ride Hailing?"
+T4-E2,easy,"Looking only at reviews about the app or website, is the negative sentiment rate higher in Fashion or Travel Booking?"
+T4-H1,hard,"Looking only at reviews about ease of use, is the negative sentiment rate higher in Groceries or Trading?"
+T4-H2,hard,"Looking only at reviews about ease of use, is the negative sentiment rate higher in Banking or Consulting?"
+T4-H3,hard,"Looking only at reviews about price and value for money, is the negative sentiment rate higher in Consulting or Streaming?"
+T5-E1,easy,Do CompareHive and Tallywise have significantly different negative sentiment rates for staff attitude?
+T5-E2,easy,Do Trippa and Roamly have significantly different negative sentiment rates for general satisfaction?
+T5-H1,hard,Do Groceries and Price Comparison have significantly different negative sentiment rates for the app or website?
+T5-H2,hard,Do Halden Savings and Kestrel Bank have significantly different negative sentiment rates for price and value for money?
+T5-H3,hard,Do Northpeak Trading and Quantly have significantly different negative sentiment rates for speed?
+T6-E1,easy,How do individual organisations in Banking compare to the industry average on the app or website? Give me each organisation's negative sentiment rate and ignore any organisations with less than 30 mentions about the app or website.
+T6-E2,easy,How do individual organisations in Travel Booking compare to the industry average on general satisfaction? Give me each organisation's negative sentiment rate and ignore any organisations with less than 30 mentions about general satisfaction.
+T6-H1,hard,How do individual organisations in Fashion compare to the industry average on the app or website? Give me each organisation's negative sentiment rate and ignore any organisations with less than 30 mentions about the app or website.
+T6-H2,hard,How do individual organisations in Consulting compare to the industry average on the app or website? Give me each organisation's negative sentiment rate and ignore any organisations with less than 30 mentions about the app or website.
+T6-H3,hard,How do individual organisations in Streaming compare to the industry average on general satisfaction? Give me each organisation's negative sentiment rate and ignore any organisations with less than 30 mentions about general satisfaction.
+T7-E1,easy,What is the biggest driver of dissatisfaction at Northeast Bank? Rank topics by negative sentiment rate and ignore any topics with less than 30 mentions.
+T7-E2,easy,What is the biggest driver of dissatisfaction at Wayfare? Rank topics by negative sentiment rate and ignore any topics with less than 30 mentions.
+T7-H1,hard,What is the biggest driver of dissatisfaction at Sable Row? Rank topics by negative sentiment rate and ignore any topics with less than 30 mentions.
+T7-H2,hard,What is the biggest driver of dissatisfaction at Investa? Rank topics by negative sentiment rate and ignore any topics with less than 30 mentions.
+T7-H3,hard,What is the biggest driver of dissatisfaction at Pinecast? Rank topics by negative sentiment rate and ignore any topics with less than 30 mentions.
+T8-E1,easy,Which 2 issues should Wayfare address first? Rank aspects using this formula: priority score = aspect prevalence x aspect negative rate. Ignore any aspects with less than 30 negative reviews.
+T8-E2,easy,Which 2 issues should Larkmead Market address first? Rank aspects using this formula: priority score = aspect prevalence x aspect negative rate. Ignore any aspects with less than 30 negative reviews.
+T8-H1,hard,Which 2 issues should Vella & Co address first? Rank aspects using this formula: priority score = aspect prevalence x aspect negative rate. Ignore any aspects with less than 30 negative reviews.
+T8-H2,hard,Which 2 issues should CompareHive address first? Rank aspects using this formula: priority score = aspect prevalence x aspect negative rate. Ignore any aspects with less than 30 negative reviews.
+T8-H3,hard,Which 2 issues should Kerbside address first? Rank aspects using this formula: priority score = aspect prevalence x aspect negative rate. Ignore any aspects with less than 30 negative reviews.
+T9-E1,easy,Why does Halden Savings have a higher complaint rate than Kestrel Bank? What should Halden Savings improve first?
+T9-E2,easy,Why does CompareHive have a higher complaint rate than PricePilot? What should CompareHive improve first?
+T9-H1,hard,Why does Sable Row have a higher complaint rate than Northerly? What should Sable Row improve first?
+T9-H2,hard,Why does Larkmead Market have a higher complaint rate than Oakpan Grocers? What should Larkmead Market improve first?
+T9-H3,hard,Why does Halden Savings have a higher complaint rate than Northeast Bank? What should Halden Savings improve first?
+T10-E1,easy,"Write a CX report for Trippa. Cover overall sentiment, the top 3 issues ranked by negative sentiment rate, and how the top issue compares with the industry average using a statistical significance test. Also give me an improvement roadmap."
+T10-E2,easy,"Write a CX report for Kestrel Bank. Cover overall sentiment, the top 3 issues ranked by negative sentiment rate, and how the top issue compares with the industry average using a statistical significance test. Also give me an improvement roadmap."
+T10-H1,hard,"Write a CX report for Vella & Co. Cover overall sentiment, the top 3 issues ranked by negative sentiment rate, and how the top issue compares with the industry average using a statistical significance test. Also give me an improvement roadmap."
+T10-H2,hard,"Write a CX report for Freshbury. Cover overall sentiment, the top 3 issues ranked by negative sentiment rate, and how the top issue compares with the industry average using a statistical significance test. Also give me an improvement roadmap."
+T10-H3,hard,"Write a CX report for Lumora. Cover overall sentiment, the top 3 issues ranked by negative sentiment rate, and how the top issue compares with the industry average using a statistical significance test. Also give me an improvement roadmap."
