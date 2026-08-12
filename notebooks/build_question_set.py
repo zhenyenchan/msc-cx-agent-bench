@@ -7,7 +7,6 @@ are declared in DISTRIBUTION and enforced by the validators below -- a question
 whose parameters do not actually produce the declared failure is reported as a
 problem and must be re-picked.
 """
-import csv
 import math
 
 import pandas as pd
@@ -97,7 +96,7 @@ TEMPLATES = {
     "T1": ("T1- Single value retrieval",
            "What proportion of {seg} reviews that mention {aspect} are {sent}?"),
     "T2": ("T2- Distribution",
-           "What is the sentiment breakdown across all {seg} reviews?"),
+           "What is the sentiment breakdown across all {seg} reviews, as percentages?"),
     "T3": ("T3- Ranking by volume",
            "What are the top 3 topics with the most number of complaints in {seg}?"),
     "T4": ("T4- Cross-segment comparison",
@@ -497,13 +496,23 @@ for tpl, (n_e, n_h, n_a, reason) in DISTRIBUTION.items():
         problems.append(f"{tpl} distribution: declared {want}, found {got}")
 
 # ---- write ----
-with open(OUT + r"\question_set_v2.csv", "w", newline="", encoding="utf-8-sig") as f:
-    w = csv.writer(f)
-    w.writerow(["task_id", "template", "question"])
-    for m in meta:
-        w.writerow([m["task_id"], m["template"], m["question"]])
+# Canonical outputs, in workflow order (step 1 of the CSV pipeline):
+#   benchmark_outputs/question_set_params.csv  full parameter table (read by
+#                                              gold_answers_manual.ipynb, step 2)
+#   benchmark_outputs/question_set.csv         agent-facing subset: task_id,
+#                                              dataset, question (dataset stays:
+#                                              the harness needs it to pick the
+#                                              easy or hard corpus)
+#   data/tasks_public.csv                      identical copy of question_set.csv,
+#                                              regenerated on every run
+CANON = r"C:\msc-cx-agent-bench\benchmark_outputs"
+params = pd.DataFrame(meta)
+params.to_csv(CANON + r"\question_set_params.csv", index=False, encoding="utf-8-sig")
 
-pd.DataFrame(meta).to_csv(OUT + r"\question_set_v2_params.csv", index=False, encoding="utf-8-sig")
+public = params[["task_id", "dataset", "question"]]
+public.to_csv(CANON + r"\question_set.csv", index=False, encoding="utf-8-sig")
+public.to_csv(r"C:\msc-cx-agent-bench\data\tasks_public.csv", index=False,
+              encoding="utf-8-sig")
 
 dist = [dict(zip(["Task type", "Template", "# tasks (Easy, all answerable)",
                   "# tasks (Hard, answerable)", "# tasks (Hard, abstention)", "Abstention reason"],
