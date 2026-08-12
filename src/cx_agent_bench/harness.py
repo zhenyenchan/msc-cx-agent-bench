@@ -7,7 +7,6 @@ record per step as it happens. It computes no metrics (R9) and imports only the
 public task loader (R3) — gold fields cannot reach a prompt from here.
 """
 
-import importlib.util
 import json
 import math
 import time
@@ -16,37 +15,79 @@ from pathlib import Path
 
 from .canonical import canonical_call
 from .tasks_public import TOOLS_MODULE_PATH, file_sha256, load_dataset
-from .tool_schemas import ALLOWED_PARAMS, REF_PARAMS, TOOL_NAMES, TOOL_SCHEMAS
+from .tool_schemas import (ALLOWED_PARAMS, PARAM_SPECS, REF_PARAMS, TOOL_NAMES,
+                           TOOL_SCHEMAS)
 
 # Step cap: ceil(2.5 x 15), the longest gold path in the task set, computed offline
 # so the harness never touches the gold file at runtime (R6, R3).
 STEP_CAP = math.ceil(2.5 * 15)
 TIMEOUT_S = 600
+STALL_LIMIT = 5  # consecutive identical no-tool-call replies before the run ends
 
-SYSTEM_PROMPT = (
-    "You are a data analyst answering one question about a corpus of customer "
-    "reviews. Each review is labelled with industry, organisation (org), aspect "
-    "(the topic it mentions) and sentiment (negative / neutral / positive).\n"
-    "\n"
-    "You cannot see the data directly and you cannot run code. Work only through "
-    "the tools: filter selects reviews, summarise counts them and derives rates, "
-    "rank orders a summary table, ztest compares the negative rates of two "
-    "non-overlapping selections. Make exactly one tool call per turn, look at the "
-    "observation that comes back, and decide the next call.\n"
-    "\n"
-    "Conventions: a rate is a share of all mentions (neutrals stay in the "
-    "denominator); a slice needs at least 30 mentions to be reportable; "
-    "significance is a two-sided z-test at alpha = 0.05; competitor, "
-    "general-satisfaction and reviews are non-actionable topics — exclude them "
-    "when recommending what an organisation should fix, but they may still be "
-    "reported as findings.\n"
-    "\n"
-    "When you have the numbers you need, call answer with a concise final answer "
-    "quoting them (rates to one decimal place, with counts). If the data cannot "
-    "support the question — an empty or too-small slice, fewer qualifying groups "
-    "than asked for — call answer with abstain=true and say why. The answer tool "
-    "is the only way to finish."
+# What each REF_PARAMS kind prefix means, for corrective bad_ref messages.
+_HANDLE_KINDS = {"s": ("selection", "filter"), "t": ("table", "summarise")}
+
+_JSON_TYPES = {"string": str, "integer": int, "boolean": bool,
+               "array": list, "null": type(None)}
+
+
+def _spec_problem(value, spec):
+    """Why a value contradicts its schema property (type / enum / anyOf), or None.
+
+    This mirrors exactly what the agent was shown in TOOL_SCHEMAS, so nothing is
+    rejected here that the documentation allowed; without it a mistyped argument
+    (group_by=['aspect'], top_k='all') crashes inside pandas with an opaque message.
+    """
+    if "anyOf" in spec:
+        if any(_spec_problem(value, branch) is None for branch in spec["anyOf"]):
+            return None
+        kinds = " or ".join(b.get("type", "?") for b in spec["anyOf"])
+        return f"must be a {kinds}, got {type(value).__name__} ({value!r})"
+    declared = spec.get("type")
+    if declared:
+        types = declared if isinstance(declared, list) else [declared]
+        matched = any(isinstance(value, _JSON_TYPES[t])
+                      and not (t == "integer" and isinstance(value, bool))
+                      for t in types)
+        if not matched:
+            return (f"must be of type {' or '.join(types)}, got "
+                    f"{type(value).__name__} ({value!r})")
+        if isinstance(value, list) and "items" in spec:
+            for entry in value:
+                problem = _spec_problem(entry, spec["items"])
+                if problem:
+                    return f"has an invalid entry: {problem}"
+    if "enum" in spec and value not in spec["enum"]:
+        return f"must be one of {spec['enum']}, got {value!r}"
+    return None
+
+ROLE = (
+    "You are a data analyst answering one question about a dataset of customer "
+    "reviews. The dataset holds labels only: each row records the industry, "
+    "organisation (org), aspect (the topic mentioned) and sentiment "
+    "(negative / neutral / positive) of one review. The review text is not in "
+    "the data, so every finding comes from counts, rates and comparisons over these labels."
 )
+
+PROTOCOL = (
+    "You cannot write or run code. All analysis is done through the tools "
+    "provided. Make exactly one tool call per turn, with no accompanying prose, "
+    "then read the observation and decide the next call. A failed call returns an "
+    "observation with status 'error' and the information needed to correct it; fix "
+    "the call and continue. The answer tool is the only way to finish."
+)
+
+POLICY = (
+    "Questions are phrased in natural language while the data uses fixed labels; "
+    "map the question onto the field values listed in the tool descriptions. "
+    "'Complaints' and 'issues' mean negative sentiment; 'praise' means positive.\n"
+    "\n"
+    "Report figures inline in the final answer, rates to one decimal place with "
+    "counts. For example: 'The top complaints in Banking are app or website, "
+    "(123 mentions), staff attitude (234 mentions) and ease of use (345 mentions).'"
+)
+
+SYSTEM_PROMPT = f"{ROLE}\n\n{PROTOCOL}\n\n{POLICY}"
 
 # Arguments that must be integers / booleans; a 7B model sometimes sends them as
 # strings, which is an argument-format fix, not reasoning done for the agent.
@@ -55,11 +96,9 @@ _BOOL_ARGS = {"ascending", "abstain"}
 
 
 def load_tools_module():
-    """Import the single fixed tools module from data/tools.py (R2)."""
-    spec = importlib.util.spec_from_file_location("bench_tools", TOOLS_MODULE_PATH)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    """The single fixed tools module (R2), shipped inside the package."""
+    from . import tools
+    return tools
 
 
 def build_messages(task):
@@ -103,14 +142,29 @@ def _validate(call, tools):
     if unknown:
         return (f"unknown argument(s) {sorted(unknown)} for {call.name}; allowed: "
                 f"{sorted(ALLOWED_PARAMS[call.name])}", "bad_args", False)
-    for ref_arg in REF_PARAMS.get(call.name, {}):
+    for param, value in call.args.items():
+        if value is None:
+            continue  # an explicit null means unset, like omitting the argument
+        problem = _spec_problem(value, PARAM_SPECS[call.name][param])
+        if problem:
+            return (f"argument '{param}' of {call.name} {problem}",
+                    "bad_args", False)
+    for ref_arg, kind in REF_PARAMS.get(call.name, {}).items():
         if ref_arg not in call.args:
             return (f"{call.name} requires '{ref_arg}'", "bad_args", False)
         ref = call.args[ref_arg]
         if not isinstance(ref, str) or ref not in tools.store:
             issued = sorted(tools.store) or ["none yet — call filter first"]
-            return (f"'{ref}' is not a handle the harness has issued; existing "
+            return (f"'{ref}' is not a handle the harness has issued. Handles are "
+                    "opaque ids that cannot be sliced or subscripted; to work on "
+                    "one group, build it as its own selection with filter. Existing "
                     f"handles: {', '.join(issued)}", "bad_ref", True)
+        if not ref.startswith(kind):
+            noun, producer = _HANDLE_KINDS[kind]
+            have_noun, _ = _HANDLE_KINDS[ref[0]]
+            return (f"{ref_arg} must be a {noun} handle produced by {producer}, "
+                    f"like '{kind}1'; '{ref}' is a {have_noun} handle",
+                    "bad_ref", False)
     if call.name == "answer" and "text" not in call.args:
         return ("answer requires 'text'", "bad_args", False)
     return None, None, False
@@ -120,7 +174,7 @@ def run_task(agent, task, out_dir, manifest=None, step_cap=STEP_CAP,
              timeout_s=TIMEOUT_S):
     """Run one agent on one task; write one append-only JSONL trace; return its path.
 
-    Terminal states (R6): submitted | step_cap | timeout | error.
+    Terminal states (R6): submitted | stalled | step_cap | timeout | error.
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -142,6 +196,7 @@ def run_task(agent, task, out_dir, manifest=None, step_cap=STEP_CAP,
           "manifest": manifest, "ts": time.time()})
 
     terminal, error_note = None, None
+    stall_content, stall_count = None, 0
     t_start = time.perf_counter()
 
     for idx in range(step_cap):
@@ -167,17 +222,35 @@ def run_task(agent, task, out_dir, manifest=None, step_cap=STEP_CAP,
 
         # -- the model produced no structured tool call ------------------------------
         if not agent_step.tool_calls:
-            observation = {"status": "error",
-                           "error": "no tool call in your reply; respond with exactly "
-                                    "one tool call (use answer to finish)"}
+            # A repeat of the same reply gets escalating feedback; STALL_LIMIT
+            # identical replies in a row end the run, because at temperature 0 an
+            # unchanged reply to a barely-changed prompt will not change again.
+            stall_count = (stall_count + 1
+                           if agent_step.content == stall_content else 1)
+            stall_content = agent_step.content
+            if stall_count == 1:
+                error_msg = ("no tool call in your reply; respond with exactly "
+                             "one tool call (use answer to finish)")
+            else:
+                error_msg = (f"no tool call in your reply, {stall_count} times in "
+                             "a row. If the text you just wrote is your final "
+                             "answer, pass it to the answer tool as 'text'; "
+                             "otherwise respond with exactly one tool call.")
+            observation = {"status": "error", "error": error_msg}
             record.update(status="error", protocol_violation=True,
                           output=observation)
             emit(record)
             messages.append({"role": "assistant", "content": agent_step.content})
             messages.append({"role": "user",
                              "content": json.dumps(observation, default=str)})
+            if stall_count >= STALL_LIMIT:
+                terminal = "stalled"
+                error_note = (f"{stall_count} consecutive identical replies "
+                              "without a tool call")
+                break
             continue
 
+        stall_content, stall_count = None, 0
         call = agent_step.tool_calls[0]
         ignored = len(agent_step.tool_calls) - 1
         call.args = _coerce_args(call.args)

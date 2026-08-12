@@ -4,11 +4,11 @@ T1-E2,easy,What proportion of Fashion reviews that mention ease of use are posit
 T1-H1,hard,What proportion of Fashion reviews that mention speed are negative?
 T1-H2,hard,What proportion of Price Comparison reviews that mention staff attitude are negative?
 T1-H3,hard,What proportion of Ride Hailing reviews that mention discounts and promotions are negative?
-T2-E1,easy,What is the sentiment breakdown across all Ride Hailing reviews?
-T2-E2,easy,What is the sentiment breakdown across all Marbrook reviews?
-T2-H1,hard,What is the sentiment breakdown across all Vanter Financial reviews?
-T2-H2,hard,What is the sentiment breakdown across all PricePilot reviews?
-T2-H3,hard,What is the sentiment breakdown across all Sable Row reviews?
+T2-E1,easy,"What is the sentiment breakdown across all Ride Hailing reviews, as percentages?"
+T2-E2,easy,"What is the sentiment breakdown across all Marbrook reviews, as percentages?"
+T2-H1,hard,"What is the sentiment breakdown across all Vanter Financial reviews, as percentages?"
+T2-H2,hard,"What is the sentiment breakdown across all PricePilot reviews, as percentages?"
+T2-H3,hard,"What is the sentiment breakdown across all Sable Row reviews, as percentages?"
 T3-E1,easy,What are the top 3 topics with the most number of complaints in Travel Booking?
 T3-E2,easy,What are the top 3 topics with the most number of complaints in Groceries?
 T3-H1,hard,What are the top 3 topics with the most number of complaints in Fashion?

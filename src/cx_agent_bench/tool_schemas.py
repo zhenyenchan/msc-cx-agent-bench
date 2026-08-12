@@ -1,6 +1,6 @@
 """The fixed tool set every agent receives (R2).
 
-One schema per tool in data/tools.py, in the provider-neutral function-calling
+One schema per tool in cx_agent_bench/tools.py, in the provider-neutral function-calling
 format (OpenAI/Ollama style). Descriptions and argument specifications are defined
 once here and are identical for every agent under evaluation; no agent may add
 tools or receive modified documentation.
@@ -21,6 +21,15 @@ ASPECTS = ["account-access", "app-website", "attitude-of-staff", "competitor",
 
 SENTIMENTS = ["negative", "neutral", "positive"]
 
+ORGS = ["Alderline Advisory", "Ardent Systems", "Bluepath Technologies",
+        "Castellan Partners", "CompareHive", "Corvex IT", "Freshbury",
+        "Halden Savings", "Investa", "Journeo", "Kerbside", "Kestrel Bank",
+        "Larkmead Market", "Lumora", "Marbrook", "Merrow & Pike",
+        "Northeast Bank", "Northerly", "Northpeak Trading", "Oakpan Grocers",
+        "Pinecast", "PricePilot", "Quantly", "Roamly", "Sable Row", "Streamly",
+        "Swiftly Rides", "Tallywise", "Trippa", "Vanter Financial",
+        "Vella & Co", "Wayfare", "Zeta Cabs"]
+
 # Which parameters hold a handle to an earlier result, and what kind of handle.
 REF_PARAMS = {"summarise": {"ref": "s"}, "rank": {"ref": "t"},
               "ztest": {"ref_a": "s", "ref_b": "s"}}
@@ -36,22 +45,22 @@ TOOL_SCHEMAS = [
                 "Subset the reviews. Fields combine with AND; a list within a field is "
                 "OR. Returns a selection handle (e.g. 's1') and how many rows matched; "
                 "n_rows = 0 is a valid result meaning the question names a slice that "
-                "does not exist. Use exclude_org to build a 'rest of the industry' "
-                "group that does not overlap with the organisation being compared "
-                "against it."),
+                "does not exist. A value that never occurs anywhere in its column is "
+                "flagged in a note: fix the value rather than concluding the slice is empty."),
             "parameters": {
                 "type": "object",
                 "properties": {
                     "industry": {**_STR_OR_LIST,
                                  "description": f"One of: {', '.join(INDUSTRIES)}"},
                     "org": {**_STR_OR_LIST,
-                            "description": "Organisation name exactly as written in the question."},
+                            "description": f"Organisation name. One of: {', '.join(ORGS)}"},
                     "aspect": {**_STR_OR_LIST,
                                "description": f"Topic label. One of: {', '.join(ASPECTS)}"},
                     "sentiment": {**_STR_OR_LIST,
                                   "description": f"One of: {', '.join(SENTIMENTS)}"},
                     "exclude_org": {**_STR_OR_LIST,
-                                    "description": "Organisation(s) to drop from the selection."},
+                                    "description": "Organisation(s) to drop from the "
+                                                   "selection. Same values as org."},
                 },
             },
         },
@@ -86,8 +95,7 @@ TOOL_SCHEMAS = [
                                      "enum": ["total_count", "neg_count", "neu_count",
                                               "pos_count"],
                                      "description": "What the floor applies to. Default "
-                                                    "total_count; use neg_count for a rule "
-                                                    "stated on complaints."},
+                                                    "total_count."},
                 },
                 "required": ["ref"],
             },
@@ -103,8 +111,9 @@ TOOL_SCHEMAS = [
                 "joint first place returns both rows. top_k=null returns every row, "
                 "ordered. exclude drops rows by group name; pass 'non_actionable' "
                 "for the topics an organisation cannot fix (competitor, "
-                "general-satisfaction, reviews) — use it when recommending actions. "
-                "Excluded groups are named in the result."),
+                "general-satisfaction, reviews). Excluded groups are named in the "
+                "result. Returns group, rank, the ranking column and its supporting "
+                "counts per row; the other columns are in the summarise result."),
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -135,9 +144,7 @@ TOOL_SCHEMAS = [
             "description": (
                 "Two-proportion z-test on the negative sentiment rates of two "
                 "selections (two-sided, alpha = 0.05). Reports the four cells, the "
-                "gap in percentage points, z, p and significance. The two selections "
-                "must not overlap: to compare an organisation with its industry, "
-                "build the second side with filter(..., exclude_org=<org>)."),
+                "gap in percentage points, z, p and significance. The two selections must not overlap."),
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -160,10 +167,9 @@ TOOL_SCHEMAS = [
             "description": (
                 "Record the final natural-language answer and stop. This is the only "
                 "way to end the run. State the key numbers (rates to one decimal "
-                "place, with counts). Set abstain=true when the data cannot support "
-                "the question as asked — an empty slice, a slice below the volume "
-                "floor, a 'top 3' where fewer than 3 topics qualify, or cells too "
-                "thin to test — and say so in the text."),
+                "place, with counts). Abstain when the data cannot support the question, e.g. when a data slice does not have the required volume. "
+                "When abstaining, begin the text with 'No answer.' "
+                "and then say why."),
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -183,3 +189,9 @@ TOOL_NAMES = [t["function"]["name"] for t in TOOL_SCHEMAS]
 
 ALLOWED_PARAMS = {t["function"]["name"]: set(t["function"]["parameters"]["properties"])
                   for t in TOOL_SCHEMAS}
+
+# Per-parameter property specs (type / enum / anyOf), for pre-dispatch screening:
+# an argument that contradicts the schema the agent was shown is rejected with a
+# corrective message instead of crashing inside the tool.
+PARAM_SPECS = {t["function"]["name"]: t["function"]["parameters"]["properties"]
+               for t in TOOL_SCHEMAS}

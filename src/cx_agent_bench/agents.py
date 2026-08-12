@@ -10,7 +10,10 @@ tools and the trace; an agent only maps a message history to the next action.
                    canned answer, through the identical interface (R11).
 """
 
+import json
+import os
 import random
+import re
 import time
 from dataclasses import dataclass, field
 
@@ -33,6 +36,59 @@ class AgentStep:
     raw_response: dict = field(default_factory=dict)
 
 
+def _tool_calls_from_text(content, tool_names):
+    """Salvage a structured call the server dropped or the model wrote as text.
+
+    Ollama 0.32.0 sometimes fails to parse a well-formed <tool_call> block out of
+    the model's output, and a small model sometimes writes the call as text
+    (`answer {"text": ...}`). Recovering these is argument-format plumbing in the
+    spirit of harness._coerce_args: the call itself is entirely the model's; only
+    its packaging is repaired. Returns [] when no call can be read.
+    """
+    if not content:
+        return []
+    decoder = json.JSONDecoder()
+
+    def first_object(text):
+        for i, ch in enumerate(text):
+            if ch != "{":
+                continue
+            try:
+                obj, _ = decoder.raw_decode(text[i:])
+            except ValueError:
+                continue
+            if isinstance(obj, dict):
+                return obj
+        return None
+
+    def as_call(obj):
+        if (isinstance(obj, dict) and isinstance(obj.get("name"), str)
+                and isinstance(obj.get("arguments"), dict)):
+            return [ToolCallReq(obj["name"], obj["arguments"])]
+        return None
+
+    # 1. an explicit <tool_call> block; the harness validates the name it claims
+    block = re.search(r"<tool_call>(.*?)(?:</tool_call>|$)", content, re.S)
+    if block:
+        call = as_call(first_object(block.group(1)))
+        if call:
+            return call
+
+    # 2. a bare {"name": ..., "arguments": {...}} object anywhere in the text
+    call = as_call(first_object(content))
+    if call:
+        return call
+
+    # 3. a known tool name written directly before its argument object,
+    #    e.g. `-answer {"text": "No answer. ..."}`
+    for m in re.finditer(r"([A-Za-z_]\w*)\s*\{", content):
+        if m.group(1) in tool_names:
+            obj = first_object(content[m.end(1):])
+            if isinstance(obj, dict) and "name" not in obj:
+                return [ToolCallReq(m.group(1), obj)]
+    return []
+
+
 class OllamaAgent:
     """Single-model ReAct agent over Ollama's structured tool-calling API."""
 
@@ -44,7 +100,14 @@ class OllamaAgent:
         self.temperature = temperature
         self.seed = seed
         self.num_ctx = num_ctx
+        self.endpoint = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
         self.agent_id = f"ollama-{model.replace(':', '-').replace('/', '-')}"
+
+    def warmup(self):
+        """Load the model into Ollama's memory before the first task, so model-load
+        time is not billed to the first run. Returns True: a model was loaded."""
+        self._ollama.generate(model=self.model, prompt="")  # empty prompt = load only
+        return True
 
     def model_digest(self):
         """Pinned model version string for the manifest (R10)."""
@@ -71,6 +134,10 @@ class OllamaAgent:
 
         calls = [ToolCallReq(name=tc.function.name, args=dict(tc.function.arguments))
                  for tc in (response.message.tool_calls or [])]
+        if not calls:
+            calls = _tool_calls_from_text(
+                response.message.content or "",
+                {t["function"]["name"] for t in tool_schemas})
         try:
             raw = response.model_dump(mode="json")
         except Exception:
@@ -102,7 +169,12 @@ class DummyAgent:
         self.model = f"dummy-{mode}"
         self.temperature = 0.0
         self.seed = seed
+        self.endpoint = "in-process (no endpoint)"
         self.agent_id = f"dummy-{mode}"
+
+    def warmup(self):
+        """No model to load. Returns False."""
+        return False
 
     def model_digest(self):
         return None

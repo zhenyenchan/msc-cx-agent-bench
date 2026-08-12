@@ -26,8 +26,9 @@ DEFAULT_ARGS = {("summarise", "min_n_column"): "total_count",
 CANONICAL_DEFAULTS = {**DEFAULT_ARGS, ("rank", "top_k"): 3}
 
 REF_ARGS = ("ref", "ref_a", "ref_b")            # arguments holding a handle
-SET_ARGS = ("industry", "org", "aspect", "parent_aspect", "sentiment", "source",
-            "exclude_org", "exclude")           # arguments naming a set of values
+# Arguments naming a set of values. "aspect" is the only aspect field in this benchmark
+# (the old parent_aspect/child_aspect split is gone); no call may use parent_aspect.
+SET_ARGS = ("industry", "org", "aspect", "sentiment", "exclude_org", "exclude")
 _UNSET = object()
 
 

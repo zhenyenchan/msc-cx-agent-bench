@@ -59,6 +59,49 @@ def test_invented_handle_is_a_protocol_violation(tmp_path):
     assert end["terminal_state"] == "submitted"             # the loop continued
 
 
+def test_wrong_kind_handle_is_rejected_with_the_producing_tool_named(tmp_path):
+    # a real handle in the wrong slot (ztest on a table) must come back as a
+    # corrective bad_ref, not crash inside the tool as KeyError: 'sentiment'
+    agent = ScriptedAgent([
+        AgentStep(tool_calls=[ToolCallReq("filter", {"industry": "Banking"})]),
+        AgentStep(tool_calls=[ToolCallReq("summarise", {"ref": "s1"})]),
+        AgentStep(tool_calls=[ToolCallReq("ztest", {"ref_a": "t1", "ref_b": "s1"})]),
+        AgentStep(tool_calls=[ToolCallReq("answer", {"text": "done"})]),
+    ])
+    _, steps, end = _run(agent, tmp_path)
+    assert steps[2]["status"] == "error"
+    assert steps[2]["error_kind"] == "bad_ref"
+    assert steps[2]["protocol_violation"] is False       # real handle, wrong slot
+    assert "produced by filter" in steps[2]["output"]["error"]
+    assert end["terminal_state"] == "submitted"
+
+
+def test_mistyped_args_are_screened_before_dispatch(tmp_path):
+    # each of these previously crashed inside pandas/statsmodels with an opaque
+    # tool_exception; the schema declares the types, so screening happens upfront
+    agent = ScriptedAgent([
+        AgentStep(tool_calls=[ToolCallReq("filter", {"industry": "Banking"})]),
+        AgentStep(tool_calls=[ToolCallReq("summarise",
+                                          {"ref": "s1", "group_by": ["aspect"]})]),
+        AgentStep(tool_calls=[ToolCallReq("summarise",
+                                          {"ref": "s1", "group_by": "aspect"})]),
+        AgentStep(tool_calls=[ToolCallReq("rank", {"ref": "t1", "top_k": "all"})]),
+        AgentStep(tool_calls=[ToolCallReq("rank", {"ref": "t1",
+                                                   "ascending": "yes"})]),
+        AgentStep(tool_calls=[ToolCallReq("ztest", {"ref_a": "s1", "ref_b": "s1",
+                                                    "alternative": "one-sided"})]),
+        AgentStep(tool_calls=[ToolCallReq("answer", {"text": "done"})]),
+    ])
+    _, steps, end = _run(agent, tmp_path)
+    assert [s["status"] for s in steps] == ["ok", "error", "ok", "error", "error",
+                                            "error", "ok"]
+    errors = [s for s in steps if s["status"] == "error"]
+    assert all(s["error_kind"] == "bad_args" for s in errors)
+    assert all(not s["protocol_violation"] for s in errors)
+    assert "one of" in steps[5]["output"]["error"]          # enum named
+    assert end["terminal_state"] == "submitted"
+
+
 def test_unknown_tool_and_bad_args_come_back_as_observations(tmp_path):
     agent = ScriptedAgent([
         AgentStep(tool_calls=[ToolCallReq("plot", {})]),
@@ -72,6 +115,55 @@ def test_unknown_tool_and_bad_args_come_back_as_observations(tmp_path):
     assert end["terminal_state"] == "submitted"
 
 
+def test_unusable_filter_values_error_instead_of_matching_nothing(tmp_path):
+    # '' / {} / [] can never match a row; reporting ok with n_rows=0 would tell
+    # the agent the slice does not exist when its query was merely malformed.
+    agent = ScriptedAgent([
+        AgentStep(tool_calls=[ToolCallReq("filter", {"industry": "Banking",
+                                                     "aspect": ""})]),
+        AgentStep(tool_calls=[ToolCallReq("filter", {"aspect": {}})]),
+        AgentStep(tool_calls=[ToolCallReq("filter", {"org": []})]),
+        AgentStep(tool_calls=[ToolCallReq("answer", {"text": "done"})]),
+    ])
+    _, steps, end = _run(agent, tmp_path)
+    assert [s["status"] for s in steps] == ["error", "error", "error", "ok"]
+    assert all(s["protocol_violation"] is False for s in steps[:3])
+    assert "empty string" in steps[0]["output"]["error"]
+    assert end["terminal_state"] == "submitted"
+
+
+def test_five_identical_no_call_replies_stall_the_run(tmp_path):
+    agent = ScriptedAgent([AgentStep(tool_calls=[], content="The rate is 50.0%.")
+                           for _ in range(10)])
+    _, steps, end = _run(agent, tmp_path)
+    assert len(steps) == 5
+    assert all(s["protocol_violation"] for s in steps)
+    assert end["terminal_state"] == "stalled"
+    # feedback escalates after the first repeat and names the answer tool
+    assert steps[0]["output"]["error"].startswith("no tool call in your reply;")
+    assert "pass it to the answer tool" in steps[1]["output"]["error"]
+    assert "5 times" in steps[4]["output"]["error"]
+
+
+def test_varied_no_call_replies_reset_the_stall_counter(tmp_path):
+    replies = [AgentStep(tool_calls=[], content=f"thinking, take {i}")
+               for i in range(8)]
+    replies.append(AgentStep(tool_calls=[ToolCallReq("answer", {"text": "done"})]))
+    _, steps, end = _run(agent := ScriptedAgent(replies), tmp_path)
+    assert len(steps) == 9
+    assert end["terminal_state"] == "submitted"
+
+
+def test_structured_call_resets_the_stall_counter(tmp_path):
+    prose = [AgentStep(tool_calls=[], content="same text") for _ in range(4)]
+    replies = (prose
+               + [AgentStep(tool_calls=[ToolCallReq("filter", {"industry": "Banking"})])]
+               + prose
+               + [AgentStep(tool_calls=[ToolCallReq("answer", {"text": "done"})])])
+    _, steps, end = _run(ScriptedAgent(replies), tmp_path)
+    assert end["terminal_state"] == "submitted"
+
+
 def test_step_cap_terminates_run(tmp_path):
     agent = ScriptedAgent([AgentStep(tool_calls=[ToolCallReq("filter",
                                                              {"industry": "Banking"})])
@@ -79,6 +171,29 @@ def test_step_cap_terminates_run(tmp_path):
     _, steps, end = _run(agent, tmp_path, step_cap=3)
     assert len(steps) == 3
     assert end["terminal_state"] == "step_cap"
+
+
+def test_log_report_aggregates_traces(tmp_path):
+    from cx_agent_bench.run_baseline import write_log_report
+    run_task(ScriptedAgent([
+        AgentStep(tool_calls=[ToolCallReq("filter", {"industry": "Banking"})]),
+        AgentStep(tool_calls=[]),                                # no tool call
+        AgentStep(tool_calls=[ToolCallReq("summarise", {"ref": "s9"})]),  # bad ref
+        AgentStep(tool_calls=[ToolCallReq("answer", {"text": "done"})]),
+    ]), TASK, tmp_path)
+    run_task(ScriptedAgent([AgentStep(tool_calls=[], content="stuck")
+                            for _ in range(6)]), TASK, tmp_path)
+    report = write_log_report(tmp_path, "in-process", "scripted", 2, 61.0)
+    text = report.read_text(encoding="utf-8")
+    assert "Model: scripted" in text and "Number of tasks: 2" in text
+    assert "Total time: 0h 1m 1s" in text
+    # 3 + 5 non-answer steps; 1+1+5 errors; 1+5 no-call steps
+    assert "Total steps (excluding answer steps): 8" in text
+    assert "Error steps: 7 (87.5% of total steps)" in text
+    assert "No tool call steps: 6 (75.0% of total steps)" in text
+    assert "At loop (after 5 consecutive identical replies): T1-E1" in text
+    assert "no_tool_call             6  yes" in text
+    assert "bad_ref                  1  yes" in text
 
 
 def test_trace_is_valid_jsonl_and_canonicalises(tmp_path):

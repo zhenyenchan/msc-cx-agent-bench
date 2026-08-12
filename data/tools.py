@@ -1,5 +1,5 @@
 """
-tools.py — the five tools an agent uses to answer the benchmark questions.
+tools.py — the five tools an agent uses to answer the benchmark questions. 
 
 Each tool is one step from gold_answers_manual.ipynb:
 
@@ -13,6 +13,8 @@ Each tool is one step from gold_answers_manual.ipynb:
 The agent does the reasoning. These tools transform data and hand back numbers;
 interpreting them, doing the arithmetic between them, and writing the answer is the
 model's job, exactly as it was mine in the notebook.
+
+Docstrings are implementation notes and are NOT agent-facing. The agent only sees tool_schemas.py.
 
 Usage
 -----
@@ -77,21 +79,46 @@ class Tools:
         that does not overlap with the organisation being compared against it.
 
         Returns a selection id and how many rows matched. n_rows = 0 is a valid
-        result: it means the question names a slice that does not exist.
+        result: it means the question names a slice that does not exist. A value
+        that never occurs anywhere in its column is flagged in a note, so a name
+        that matched nothing is distinguishable from a slice that is empty.
         """
         args = {k: v for k, v in locals().items() if k != "self" and v is not None}
+        for field, value in args.items():
+            problem = _filter_value_problem(value)
+            if problem:
+                return self._log("filter", args, {
+                    "error": f"filter argument '{field}' {problem}; pass a non-empty "
+                             "string or a list of non-empty strings (valid labels are "
+                             "in the tool description), or omit the field to leave it "
+                             "unconstrained"})
         sub = self.df
+        unrecognised = []
         for field in FILTER_FIELDS:
             value = args.get(field)
             if value is not None:
                 values = value if isinstance(value, list) else [value]
+                missing = [v for v in values if v not in set(self.df[field])]
+                if missing:
+                    unrecognised.append(
+                        f"{missing!r} never occur(s) in the '{field}' column")
                 sub = sub[sub[field].isin(values)]
         if exclude_org is not None:
             drop = exclude_org if isinstance(exclude_org, list) else [exclude_org]
+            missing = [v for v in drop if v not in set(self.df["org"])]
+            if missing:
+                unrecognised.append(
+                    f"{missing!r} never occur(s) in the 'org' column")
             sub = sub[~sub["org"].isin(drop)]
 
         ref = self._put("s", sub)
-        return self._log("filter", args, {"id": ref, "n_rows": int(len(sub))})
+        result = {"id": ref, "n_rows": int(len(sub))}
+        if unrecognised:
+            result["note"] = (
+                "; ".join(unrecognised) + ". Valid values for each field are "
+                "listed in the tool description; a zero count caused by an "
+                "unrecognised name is not evidence that the slice is empty.")
+        return self._log("filter", args, result)
 
     # -- 2. summarise ------------------------------------------------------------
 
@@ -171,6 +198,11 @@ class Tools:
         Ties share a rank (method="min") and top_k keeps every row with rank <= top_k,
         so a joint first place returns both rows rather than the sort inventing a winner.
         top_k=None returns every row, ordered.
+
+        The observation echoes only group, rank, the ranking column and the counts
+        behind it — the full 10-column table was already shown by summarise and
+        stays intact behind the returned handle, so ranking again by another
+        column still works.
         """
         args = {k: v for k, v in locals().items() if k != "self" and v is not None}
         # top_k is the one argument whose None is not "unset": it means the whole ranking,
@@ -206,7 +238,15 @@ class Tools:
             out = out[out["rank"] <= top_k]
 
         table_id = self._put("t", out)
-        result = {"id": table_id, "rows": _rows(out), "n_groups_available": n_available}
+        # Echo only what ranking added: the order, the ranking column, and the
+        # counts that define it. The full table stays in the store under table_id.
+        support = {"neg_rate": ["neg_count"], "neu_rate": ["neu_count"],
+                   "pos_rate": ["pos_count"],
+                   "priority_score": ["prevalence", "neg_rate", "neg_count"]}
+        keep = ["group", "rank", by, *support.get(by, []), "total_count"]
+        keep = list(dict.fromkeys(c for c in keep if c in out.columns))
+        result = {"id": table_id, "rows": _rows(out[keep]),
+                  "n_groups_available": n_available}
         if excluded:
             result["excluded"] = excluded
         return self._log("rank", args, result)
@@ -236,10 +276,16 @@ class Tools:
                 "group_a": _round(a), "group_b": _round(b),
                 "error": "one side has no reviews, so there is no rate to test",
             })
-        z, p = proportions_ztest(count=[a["neg"], b["neg"]],
-                                 nobs=[a["total"], b["total"]],
-                                 alternative=alternative)
-        z, p = float(z), float(p)
+        pooled_neg = a["neg"] + b["neg"]
+        if pooled_neg == 0 or pooled_neg == a["total"] + b["total"]:
+            # pooled rate 0 or 1 makes the z denominator zero; skip the call rather
+            # than let statsmodels divide 0/0 and raise a RuntimeWarning
+            z = p = float("nan")
+        else:
+            z, p = proportions_ztest(count=[a["neg"], b["neg"]],
+                                     nobs=[a["total"], b["total"]],
+                                     alternative=alternative)
+            z, p = float(z), float(p)
         usable = math.isfinite(z) and math.isfinite(p)
 
         result = {
@@ -272,6 +318,23 @@ class Tools:
     def path(self):
         """The tools called, in order: ['filter', 'summarise', 'rank', 'answer']."""
         return [c["tool"] for c in self.calls]
+
+
+def _filter_value_problem(value):
+    """Why a filter value can never match anything, or None if it is usable.
+
+    A usable value is a non-empty string or a non-empty list of non-empty strings;
+    anything else ('', {}, [], a schema fragment) would silently select zero rows,
+    and a zero-row result must keep meaning "the slice does not exist in the data".
+    """
+    if isinstance(value, str):
+        return "is an empty string" if not value.strip() else None
+    if isinstance(value, list):
+        if not value:
+            return "is an empty list"
+        bad = [v for v in value if not isinstance(v, str) or not v.strip()]
+        return f"contains non-string or empty entries {bad!r}" if bad else None
+    return f"is a {type(value).__name__} ({value!r}), not a string"
 
 
 def _rows(frame, nd=4):

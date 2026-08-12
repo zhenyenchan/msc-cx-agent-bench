@@ -38,6 +38,23 @@ def agent_canonical_json(steps):
     return json.dumps(path, sort_keys=True, separators=(",", ":"))
 
 
+def error_kinds(steps):
+    """Error steps of a run bucketed by kind, as 'no_tool_call:5;bad_ref:2'.
+
+    Kinds stamped by the harness (unknown_tool, bad_args, bad_ref, tool_exception)
+    are used as-is; a no-call turn has no tool, and a validated call whose tool
+    returned an error dict is 'tool_error_result'."""
+    counts = {}
+    for s in steps:
+        if s["status"] != "error":
+            continue
+        kind = s.get("error_kind") or ("no_tool_call" if s["tool"] is None
+                                       else "tool_error_result")
+        counts[kind] = counts.get(kind, 0) + 1
+    return ";".join(f"{k}:{v}" for k, v in
+                    sorted(counts.items(), key=lambda kv: -kv[1]))
+
+
 def score_run(trace_path, gold):
     start, steps, end = read_trace(trace_path)
     if start is None:
@@ -54,11 +71,13 @@ def score_run(trace_path, gold):
         "terminal_state": (end or {}).get("terminal_state", "missing_run_end"),
         "n_steps": len(steps),
         "n_errors": sum(s["status"] == "error" for s in steps),
+        "error_kinds": error_kinds(steps),
         "n_protocol_violations": sum(bool(s.get("protocol_violation")) for s in steps),
         "path_match": (agent_path == gold_path) if gold_path is not None else None,
         "gold_num_steps": task_gold.get("gold_num_steps"),
         "abstained": final.get("abstain"),
-        "answer": final.get("text"),
+        "question": task_gold.get("question"),
+        "agent_answer": final.get("text"),
         "gold_answer": task_gold.get("gold_answer"),
         "tokens_in": sum(s["tokens_in"] or 0 for s in steps),
         "tokens_out": sum(s["tokens_out"] or 0 for s in steps),
@@ -84,6 +103,7 @@ def summarise_scores(scores):
         out[agent_id] = {
             "runs": len(group),
             "submitted": int((group.terminal_state == "submitted").sum()),
+            "stalled": int((group.terminal_state == "stalled").sum()),
             "step_cap": int((group.terminal_state == "step_cap").sum()),
             "timeout": int((group.terminal_state == "timeout").sum()),
             "error": int((group.terminal_state == "error").sum()),

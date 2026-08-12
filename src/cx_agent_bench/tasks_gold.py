@@ -17,7 +17,9 @@ GOLD_FIELDS = ["gold_answer", "gold_tool_path_display", "gold_tool_path_json",
 
 
 def load_gold_tasks():
-    """Gold fields keyed by task_id: {task_id: {gold_answer, gold_tool_path_json, ...}}."""
+    """Gold fields keyed by task_id: {task_id: {gold_answer, gold_tool_path_json, ...}}.
+
+    The question text (a public field) rides along for scoring reports."""
     gold = pd.read_csv(TASKS_GOLD_CSV, index_col=0)
-    return {row["task_id"]: {field: row[field] for field in GOLD_FIELDS}
+    return {row["task_id"]: {field: row[field] for field in ["question"] + GOLD_FIELDS}
             for _, row in gold.iterrows()}

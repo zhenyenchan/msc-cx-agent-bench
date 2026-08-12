@@ -15,7 +15,7 @@ DATA_DIR = REPO_ROOT / "data"
 
 TASKS_PUBLIC_CSV = DATA_DIR / "tasks_public.csv"
 DATASET_CSVS = {"easy": DATA_DIR / "easy_data.csv", "hard": DATA_DIR / "hard_data.csv"}
-TOOLS_MODULE_PATH = DATA_DIR / "tools.py"
+TOOLS_MODULE_PATH = Path(__file__).resolve().parent / "tools.py"
 
 PUBLIC_FIELDS = ["task_id", "dataset", "question"]
 
