@@ -144,7 +144,8 @@ TOOL_SCHEMAS = [
             "description": (
                 "Two-proportion z-test on the negative sentiment rates of two "
                 "selections (two-sided, alpha = 0.05). Reports the four cells, the "
-                "gap in percentage points, z, p and significance. The two selections must not overlap."),
+                "gap in percentage points, z, p and significance. The two selections must not overlap. "
+                "Each of the four cells should exceed 10 for the test to be reliable, and sufficiency is reported in the result."),
             "parameters": {
                 "type": "object",
                 "properties": {

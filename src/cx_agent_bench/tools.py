@@ -116,8 +116,7 @@ class Tools:
         if unrecognised:
             result["note"] = (
                 "; ".join(unrecognised) + ". Valid values for each field are "
-                "listed in the tool description; a zero count caused by an "
-                "unrecognised name is not evidence that the slice is empty.")
+                "listed in the tool description.")
         return self._log("filter", args, result)
 
     # -- 2. summarise ------------------------------------------------------------
@@ -256,8 +255,11 @@ class Tools:
     def ztest(self, ref_a, ref_b, alternative="two-sided"):
         """Two-proportion z-test on the negative sentiment rates of two selections.
 
-        Always reports the four cells, z, p and the gap. The two selections must not overlap. To compare an organisation with its
-        industry, build the second side with filter(..., exclude_org=<org>).
+        Always reports the four cells, z, p, the gap, and 'sufficient': whether
+        each of the four cells exceeds MIN_CELL, the reliability convention the
+        agent-facing description states. The two selections must not overlap. To
+        compare an organisation with its industry, build the second side with
+        filter(..., exclude_org=<org>).
         """
         args = {"ref_a": ref_a, "ref_b": ref_b, "alternative": alternative}
         cells = {}
@@ -291,6 +293,8 @@ class Tools:
         result = {
             "group_a": _round(a),
             "group_b": _round(b),
+            "sufficient": all(cell > MIN_CELL for side in (a, b)
+                              for cell in (side["neg"], side["non_neg"])),
             "gap_pp": round((a["neg_rate"] - b["neg_rate"]) * 100, 1),
             "z": round(z, 3) if usable else None,
             "p_value": round(p, 4) if usable else None,

@@ -11,6 +11,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from .harness import list_price_cost
 from .tasks_gold import load_gold_tasks
 
 
@@ -69,19 +70,26 @@ def score_run(trace_path, gold):
         "agent_id": start["agent_id"],
         "model": start["model"],
         "terminal_state": (end or {}).get("terminal_state", "missing_run_end"),
-        "n_steps": len(steps),
+        "agent_n_steps": len(steps),
         "n_errors": sum(s["status"] == "error" for s in steps),
         "error_kinds": error_kinds(steps),
         "n_protocol_violations": sum(bool(s.get("protocol_violation")) for s in steps),
         "path_match": (agent_path == gold_path) if gold_path is not None else None,
-        "gold_num_steps": task_gold.get("gold_num_steps"),
+        "agent_tool_path": agent_path,
+        "gold_tool_path": gold_path,
+        "gold_n_steps": task_gold.get("gold_num_steps"),
         "abstained": final.get("abstain"),
         "question": task_gold.get("question"),
         "agent_answer": final.get("text"),
         "gold_answer": task_gold.get("gold_answer"),
         "tokens_in": sum(s["tokens_in"] or 0 for s in steps),
         "tokens_out": sum(s["tokens_out"] or 0 for s in steps),
-        "wall_s": (end or {}).get("wall_s"),
+        "cost_usd_gateway": (
+            round(sum(s.get("cost_usd") or 0 for s in steps), 6)
+            if any(s.get("cost_usd") is not None for s in steps) else None),
+        "cost_usd_list": list_price_cost(
+            steps, (start.get("manifest") or {}).get("list_prices_usd_per_1m")),
+        "latency_s": (end or {}).get("wall_s"),
     }
 
 
@@ -108,10 +116,16 @@ def summarise_scores(scores):
             "timeout": int((group.terminal_state == "timeout").sum()),
             "error": int((group.terminal_state == "error").sum()),
             "path_match_rate": round(float(group.path_match.fillna(False).mean()), 3),
-            "mean_steps": round(float(group.n_steps.mean()), 2),
+            "mean_steps": round(float(group.agent_n_steps.mean()), 2),
             "mean_errors": round(float(group.n_errors.mean()), 2),
             "protocol_violations": int(group.n_protocol_violations.sum()),
             "mean_tokens_out": round(float(group.tokens_out.mean()), 1),
+            "total_cost_usd_gateway": (
+                round(float(group.cost_usd_gateway.sum()), 4)
+                if group.cost_usd_gateway.notna().any() else None),
+            "total_cost_usd_list": (
+                round(float(group.cost_usd_list.sum()), 4)
+                if group.cost_usd_list.notna().any() else None),
         }
     return out
 

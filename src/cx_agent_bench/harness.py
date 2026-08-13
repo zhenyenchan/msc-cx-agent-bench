@@ -71,10 +71,12 @@ ROLE = (
 
 PROTOCOL = (
     "You cannot write or run code. All analysis is done through the tools "
-    "provided. Make exactly one tool call per turn, with no accompanying prose, "
-    "then read the observation and decide the next call. A failed call returns an "
-    "observation with status 'error' and the information needed to correct it; fix "
-    "the call and continue. The answer tool is the only way to finish."
+    "provided. Every turn must be exactly one tool call, with no accompanying "
+    "prose, then read the observation and decide the next call. Text outside a "
+    "tool call is discarded and never reaches the user, so a final answer written "
+    "as plain text is lost. Submit the final answer with the answer tool, which is the only way "
+    "to finish. A failed call returns an observation with status 'error' and the "
+    "information needed to correct it - fix the call and continue."
 )
 
 POLICY = (
@@ -84,7 +86,12 @@ POLICY = (
     "\n"
     "Report figures inline in the final answer, rates to one decimal place with "
     "counts. For example: 'The top complaints in Banking are app or website, "
-    "(123 mentions), staff attitude (234 mentions) and ease of use (345 mentions).'"
+    "(123 mentions), staff attitude (234 mentions) and ease of use (345 mentions).'\n"
+    "\n"
+    "A slice needs at least 30 mentions to be reported reliably. Below that, say so "
+    "rather than reporting the figure. Competitor, general-satisfaction and reviews "
+    "are non-actionable topics - exclude them when recommending what an organisation "
+    "should fix, though they may still be reported as findings."
 )
 
 SYSTEM_PROMPT = f"{ROLE}\n\n{PROTOCOL}\n\n{POLICY}"
@@ -125,15 +132,17 @@ def _coerce_args(args):
     return out
 
 
-def _validate(call, tools):
+def _validate(call, tools, offered=TOOL_NAMES):
     """Screen a requested call before dispatch.
 
-    Returns (error_message, error_kind, violation). Refs are checked against the
-    handles the harness has actually issued; a handle the agent invents is a
-    protocol violation (R4). Unknown tools and unknown arguments are tool
-    failures fed back as observations (R7)."""
-    if call.name not in TOOL_NAMES:
-        return (f"unknown tool '{call.name}'; available tools: {', '.join(TOOL_NAMES)}",
+    Returns (error_message, error_kind, violation). Only two failures are
+    protocol violations (R4): a reply with no tool call (handled in the loop)
+    and an unknown tool — including a real tool that was not offered to this
+    run (the no-tool ablation offers answer only). Everything else — unknown or
+    mistyped arguments, invented or wrong-kind handles — is a genuine agent
+    mistake, fed back as a corrective observation (R7)."""
+    if call.name not in offered:
+        return (f"unknown tool '{call.name}'; available tools: {', '.join(offered)}",
                 "unknown_tool", True)
     if not isinstance(call.args, dict):
         return (f"arguments must be an object, got {type(call.args).__name__}",
@@ -158,7 +167,7 @@ def _validate(call, tools):
             return (f"'{ref}' is not a handle the harness has issued. Handles are "
                     "opaque ids that cannot be sliced or subscripted; to work on "
                     "one group, build it as its own selection with filter. Existing "
-                    f"handles: {', '.join(issued)}", "bad_ref", True)
+                    f"handles: {', '.join(issued)}", "bad_ref", False)
         if not ref.startswith(kind):
             noun, producer = _HANDLE_KINDS[kind]
             have_noun, _ = _HANDLE_KINDS[ref[0]]
@@ -171,11 +180,16 @@ def _validate(call, tools):
 
 
 def run_task(agent, task, out_dir, manifest=None, step_cap=STEP_CAP,
-             timeout_s=TIMEOUT_S):
+             timeout_s=TIMEOUT_S, tool_schemas=TOOL_SCHEMAS):
     """Run one agent on one task; write one append-only JSONL trace; return its path.
+
+    tool_schemas is the tool set offered to the agent this run — the full five
+    by default; the no-tool ablation passes the answer schema alone. Calls to
+    tools outside the offered set are rejected as unknown.
 
     Terminal states (R6): submitted | stalled | step_cap | timeout | error.
     """
+    offered = [schema["function"]["name"] for schema in tool_schemas]
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     run_id = f"{agent.agent_id}__{task['task_id']}__{uuid.uuid4().hex[:8]}"
@@ -206,7 +220,7 @@ def run_task(agent, task, out_dir, manifest=None, step_cap=STEP_CAP,
 
         t_step = time.perf_counter()
         try:
-            agent_step = agent.step(messages, TOOL_SCHEMAS)
+            agent_step = agent.step(messages, tool_schemas)
         except Exception as exc:  # provider/agent failure: the run ends, recorded
             terminal, error_note = "error", f"{type(exc).__name__}: {exc}"
             break
@@ -218,6 +232,7 @@ def run_task(agent, task, out_dir, manifest=None, step_cap=STEP_CAP,
                   "tokens_in": agent_step.tokens_in,
                   "tokens_out": agent_step.tokens_out,
                   "latency_s": step_latency,
+                  "cost_usd": agent_step.cost_usd,
                   "raw_response": agent_step.raw_response}
 
         # -- the model produced no structured tool call ------------------------------
@@ -257,7 +272,7 @@ def run_task(agent, task, out_dir, manifest=None, step_cap=STEP_CAP,
         record.update(tool=call.name, args=call.args)
 
         # -- validate, then dispatch into the tools module (R4, R7) ------------------
-        error, error_kind, violation = _validate(call, tools)
+        error, error_kind, violation = _validate(call, tools, offered)
         if error is None:
             try:
                 result = getattr(tools, call.name)(**call.args)
@@ -308,6 +323,43 @@ def run_task(agent, task, out_dir, manifest=None, step_cap=STEP_CAP,
     return trace_path
 
 
+# Public list prices, USD per 1M tokens, recorded into the manifest at run time
+# (R10) so scoring can compute a reproducible list-price cost per task. Cached
+# input is the provider's cache-read rate (Vertex implicit caching). Extend as
+# the experiment's model roster grows.
+LIST_PRICES = {
+    "vertex_ai/gemini-2.5-flash": {"input": 0.30, "cached_input": 0.03,
+                                   "output": 2.50},
+}
+
+
+def list_price_cost(steps, prices):
+    """Total list-price USD cost over step records, or None without a price row.
+
+    Per step: (input - cached) * p_in + cached * p_cached + output * p_out,
+    with cached-token counts taken from the provider's usage block as stored in
+    raw_response. Validated against the gateway's reported cost (exact match).
+    """
+    if not prices:
+        return None
+    total = 0.0
+    for s in steps:
+        raw = s.get("raw_response")
+        if isinstance(raw, str):
+            try:
+                raw = json.loads(raw)
+            except ValueError:
+                raw = {}
+        usage = (raw.get("usage") or {}) if isinstance(raw, dict) else {}
+        cached = (usage.get("prompt_tokens_details") or {}).get("cached_tokens") or 0
+        tokens_in = s.get("tokens_in") or 0
+        tokens_out = s.get("tokens_out") or 0
+        total += ((tokens_in - cached) * prices["input"]
+                  + cached * prices["cached_input"]
+                  + tokens_out * prices["output"]) / 1e6
+    return round(total, 6)
+
+
 def build_manifest(agent):
     """Provenance for a batch of runs (R10): corpus hashes, tool module hash,
     generator commit, pinned model info."""
@@ -332,4 +384,5 @@ def build_manifest(agent):
         "model_info": agent.model_digest(),
         "temperature": agent.temperature,
         "seed": agent.seed,
+        "list_prices_usd_per_1m": LIST_PRICES.get(agent.model),
     }

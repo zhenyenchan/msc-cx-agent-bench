@@ -47,14 +47,17 @@ def test_dummy_agent_runs_through_identical_harness(tmp_path):
     assert end["final_answer"] == {"text": "", "abstain": False}
 
 
-def test_invented_handle_is_a_protocol_violation(tmp_path):
+def test_invented_handle_is_an_agent_mistake_not_a_violation(tmp_path):
+    # only no_tool_call and unknown_tool are protocol violations; a handle the
+    # agent invents is a genuine mistake, fed back as a corrective observation
     agent = ScriptedAgent([
         AgentStep(tool_calls=[ToolCallReq("summarise", {"ref": "s99"})]),
         AgentStep(tool_calls=[ToolCallReq("answer", {"text": "done"})]),
     ])
     _, steps, end = _run(agent, tmp_path)
     assert steps[0]["status"] == "error"
-    assert steps[0]["protocol_violation"] is True
+    assert steps[0]["error_kind"] == "bad_ref"
+    assert steps[0]["protocol_violation"] is False
     assert steps[0]["output"]["status"] == "error"          # structured, not raised
     assert end["terminal_state"] == "submitted"             # the loop continued
 
@@ -99,6 +102,23 @@ def test_mistyped_args_are_screened_before_dispatch(tmp_path):
     assert all(s["error_kind"] == "bad_args" for s in errors)
     assert all(not s["protocol_violation"] for s in errors)
     assert "one of" in steps[5]["output"]["error"]          # enum named
+    assert end["terminal_state"] == "submitted"
+
+
+def test_unoffered_tools_are_rejected_in_the_no_tool_condition(tmp_path):
+    from cx_agent_bench.tool_schemas import TOOL_SCHEMAS
+    answer_only = [s for s in TOOL_SCHEMAS if s["function"]["name"] == "answer"]
+    agent = ScriptedAgent([
+        AgentStep(tool_calls=[ToolCallReq("filter", {"industry": "Banking"})]),
+        AgentStep(tool_calls=[ToolCallReq("answer", {"text": "No answer.",
+                                                     "abstain": True})]),
+    ])
+    _, steps, end = _run(agent, tmp_path, tool_schemas=answer_only)
+    # a real tool outside the offered set must not execute or issue a handle
+    assert steps[0]["status"] == "error"
+    assert steps[0]["error_kind"] == "unknown_tool"
+    assert steps[0]["handle"] is None
+    assert "available tools: answer" in steps[0]["output"]["error"]
     assert end["terminal_state"] == "submitted"
 
 
@@ -185,15 +205,34 @@ def test_log_report_aggregates_traces(tmp_path):
                             for _ in range(6)]), TASK, tmp_path)
     report = write_log_report(tmp_path, "in-process", "scripted", 2, 61.0)
     text = report.read_text(encoding="utf-8")
-    assert "Model: scripted" in text and "Number of tasks: 2" in text
-    assert "Total time: 0h 1m 1s" in text
+    assert "model: scripted" in text and "total tasks: 2" in text
+    assert "total time: 0h 1m 1s" in text
+    assert "total cost (USD): n/a (gateway) / n/a (list prices)" in text
+    assert "submitted tasks: 1" in text
+    assert "failed tasks (not submitted): 1" in text
+    # both runs are T1-E1, so one distinct task carries the no-call errors
+    assert 'tasks with "no tool call" errors: 1' in text
+    assert "task ids: T1-E1" in text
+    assert 'tasks with "unknown tool" errors: 0' in text
     # 3 + 5 non-answer steps; 1+1+5 errors; 1+5 no-call steps
-    assert "Total steps (excluding answer steps): 8" in text
-    assert "Error steps: 7 (87.5% of total steps)" in text
-    assert "No tool call steps: 6 (75.0% of total steps)" in text
-    assert "At loop (after 5 consecutive identical replies): T1-E1" in text
+    assert "total steps: 8 (excluding answer steps)" in text
+    assert "error steps: 7 (87.5% of total steps)" in text
+    assert "no tool call steps: 6 (75.0% of total steps)" in text
+    assert "reached loop cap (5 consecutive identical replies): T1-E1" in text
     assert "no_tool_call             6  yes" in text
-    assert "bad_ref                  1  yes" in text
+    assert "bad_ref                  1  no" in text
+
+
+def test_list_price_cost_prices_cached_tokens_separately():
+    from cx_agent_bench.harness import list_price_cost
+    prices = {"input": 0.30, "cached_input": 0.03, "output": 2.50}
+    steps = [{"tokens_in": 1000, "tokens_out": 100,
+              "raw_response": {"usage": {"prompt_tokens_details":
+                                         {"cached_tokens": 600}}}},
+             {"tokens_in": 500, "tokens_out": 50, "raw_response": {}}]
+    # (400*0.30 + 600*0.03 + 100*2.50 + 500*0.30 + 50*2.50) / 1e6
+    assert list_price_cost(steps, prices) == 0.000663
+    assert list_price_cost(steps, None) is None
 
 
 def test_trace_is_valid_jsonl_and_canonicalises(tmp_path):
