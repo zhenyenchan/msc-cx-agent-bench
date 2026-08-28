@@ -5,8 +5,9 @@
     python -m cx_agent_bench.run_baseline --agent qwen --tasks T1-E1 T4-H2
     python -m cx_agent_bench.run_baseline --agent qwen --limit 3
 
-Execution only: traces are written to --out; score them afterwards with
-    python -m cx_agent_bench.scoring <trace_dir> --out scores.csv
+Traces are written to --out; when the run finishes, scoring runs automatically:
+the run dir gets its scores.csv and the repo-wide benchmark_outputs/results.csv
+is refreshed from every scored run.
 """
 
 import argparse
@@ -256,6 +257,15 @@ def run_suite(agent, tasks, out_dir, step_cap=STEP_CAP, timeout_s=TIMEOUT_S,
     report = write_log_report(out_dir, agent.endpoint, agent.model,
                               len(tasks), sum(durations))
     print(f"report   -> {report}")
+
+    # Scoring stays downstream of execution (R9): the run is finished and its
+    # traces are on disk before any gold field is read. Imported here so the
+    # execution modules never load gold data at import time.
+    from .scoring import score_dir
+    from .summary import update_results
+    score_dir(out_dir)
+    print(f"scores   -> {out_dir / 'scores.csv'}")
+    print(f"results  -> {update_results()}")
     return out_dir
 
 

@@ -8,8 +8,8 @@
 The harness, tools, schemas, traces and reports are identical to run_baseline.py
 (everything shared through run_suite); only the serving endpoint differs. Needs
 OPENAI_BASE_URL and OPENAI_API_KEY in .env, as in cx_agent_poc/llm.py.
-Score afterwards with
-    python -m cx_agent_bench.scoring <trace_dir> --out scores.csv
+When the run finishes, scoring runs automatically: the run dir gets its
+scores.csv and benchmark_outputs/results.csv is refreshed.
 """
 
 import argparse

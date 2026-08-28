@@ -56,6 +56,33 @@ def error_kinds(steps):
                     sorted(counts.items(), key=lambda kv: -kv[1]))
 
 
+def evaluation_metrics(steps, final, task_gold, end, cost_gateway, cost_list):
+    """The six per-task benchmark metrics. Each is summed (never averaged) across
+    the 50 tasks, so per-task values are bounded 0-1 except insight (0-5)."""
+    # tool selection accuracy: recall of the gold tool set, order and args ignored
+    gold_path = task_gold.get("gold_tool_path_json")
+    gold_tools = ({call["tool"] for call in json.loads(gold_path)}
+                  if gold_path else None)
+    agent_tools = {s["tool"] for s in steps
+                   if s.get("status") == "ok" and s.get("tool") != "answer"}
+
+    # path efficiency: gold vs every non-answer turn spent (errors included)
+    gold_n = task_gold.get("gold_num_steps")
+    agent_n = sum(1 for s in steps if s.get("tool") != "answer")
+
+    return {
+        "task_completion": int(bool((final.get("text") or "").strip())),
+        "insight_score": None,  # TODO: 0-5 answer quality, computation TBD
+        "tool_selection_accuracy": (
+            round(len(gold_tools & agent_tools) / len(gold_tools), 3)
+            if gold_tools else None),
+        "path_efficiency": (
+            round(min(1.0, gold_n / agent_n), 3) if gold_n and agent_n else 0.0),
+        "cost_usd": cost_gateway if cost_gateway is not None else cost_list,
+        "latency_s": (end or {}).get("wall_s"),
+    }
+
+
 def score_run(trace_path, gold):
     start, steps, end = read_trace(trace_path)
     if start is None:
@@ -64,6 +91,10 @@ def score_run(trace_path, gold):
     final = (end or {}).get("final_answer") or {}
     agent_path = agent_canonical_json(steps)
     gold_path = task_gold.get("gold_tool_path_json")
+    cost_gateway = (round(sum(s.get("cost_usd") or 0 for s in steps), 6)
+                    if any(s.get("cost_usd") is not None for s in steps) else None)
+    cost_list = list_price_cost(
+        steps, (start.get("manifest") or {}).get("list_prices_usd_per_1m"))
     return {
         "run_id": start["run_id"],
         "task_id": start["task_id"],
@@ -84,23 +115,30 @@ def score_run(trace_path, gold):
         "gold_answer": task_gold.get("gold_answer"),
         "tokens_in": sum(s["tokens_in"] or 0 for s in steps),
         "tokens_out": sum(s["tokens_out"] or 0 for s in steps),
-        "cost_usd_gateway": (
-            round(sum(s.get("cost_usd") or 0 for s in steps), 6)
-            if any(s.get("cost_usd") is not None for s in steps) else None),
-        "cost_usd_list": list_price_cost(
-            steps, (start.get("manifest") or {}).get("list_prices_usd_per_1m")),
-        "latency_s": (end or {}).get("wall_s"),
+        "cost_usd_gateway": cost_gateway,
+        "cost_usd_list": cost_list,
+        # the six benchmark metrics, kept as the last columns of scores.csv
+        **evaluation_metrics(steps, final, task_gold, end, cost_gateway, cost_list),
     }
 
 
+METRIC_COLS = ["task_completion", "insight_score", "tool_selection_accuracy",
+               "path_efficiency", "cost_usd", "latency_s"]
+
+
 def score_dir(trace_dir, out_csv=None):
-    """Score every trace in a directory; optionally write a per-run CSV."""
+    """Score every trace in one agent run's directory. The full per-run frame is
+    returned, and the run gets its scores.csv: one row per task, the six metrics
+    per row (aggregation is a separate later step). out_csv overrides the
+    default location <trace_dir>/scores.csv."""
     gold = load_gold_tasks()
     rows = [row for path in sorted(Path(trace_dir).glob("*.jsonl"))
             if (row := score_run(path, gold)) is not None]
     scores = pd.DataFrame(rows)
-    if out_csv and len(scores):
-        scores.to_csv(out_csv, index=False)
+    if len(scores):
+        out_csv = out_csv or Path(trace_dir) / "scores.csv"
+        scores[["task_id", *METRIC_COLS]].sort_values("task_id").to_csv(
+            out_csv, index=False)
     return scores
 
 
@@ -135,15 +173,15 @@ def main():
     parser = argparse.ArgumentParser(description="Score stored traces (run separately "
                                                  "from execution).")
     parser.add_argument("trace_dir")
-    parser.add_argument("--out", default=None, help="per-run scores CSV")
+    parser.add_argument("--out", default=None,
+                        help="scores CSV path (default: <trace_dir>/scores.csv)")
     args = parser.parse_args()
     scores = score_dir(args.trace_dir, args.out)
     if not len(scores):
         print("no traces found")
         return
     print(json.dumps(summarise_scores(scores), indent=2))
-    if args.out:
-        print(f"per-run scores -> {args.out}")
+    print(f"scores -> {args.out or Path(args.trace_dir) / 'scores.csv'}")
 
 
 if __name__ == "__main__":
