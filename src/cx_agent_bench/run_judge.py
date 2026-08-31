@@ -2,7 +2,8 @@
 
 Grades each agent answer against the gold answer with a reference-based
 rubric prompt; the judge never sees the underlying data. Defaults to
-Gemini 3.1 Pro at temperature 0.0 on all 50 rows of
+Kimi K2 Thinking — the pipeline's production judge (scoring.py grades
+insight_score with it) — at temperature 0.0 on all 50 rows of
 tagging/baseline_answers.csv.
 
     python -m cx_agent_bench.run_judge
@@ -23,9 +24,12 @@ import pandas as pd
 
 from .tasks_public import REPO_ROOT
 
-# The gateway pins europe-west4, which serves no gemini-3.x model (404); the
-# per-request vertex_location=global override reaches the location that does.
-JUDGE_DEFAULT_MODEL = "vertex_ai/gemini-3.1-pro-preview"
+# Kimi K2 Thinking won the judge validation against the 3-rater human panel
+# (tagging/human_judge_results.ipynb) and is the pipeline's only insight judge.
+# The gateway pins europe-west4, which serves neither the MaaS models nor
+# gemini-3.x (404); the per-request vertex_location=global override reaches
+# the location that does.
+JUDGE_DEFAULT_MODEL = "vertex_ai/moonshotai/kimi-k2-thinking-maas"
 JUDGE_DEFAULT_VERTEX_LOCATION = "global"
 ANSWERS_CSV = REPO_ROOT / "tagging" / "baseline_answers.csv"
 SCORES_CSV = REPO_ROOT / "tagging" / "judge_scores.csv"

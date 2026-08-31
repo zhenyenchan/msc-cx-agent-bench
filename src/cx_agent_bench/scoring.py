@@ -3,7 +3,9 @@
 Nothing here runs during a benchmark run. It reads the JSONL traces the harness
 wrote, joins gold fields on task_id, and computes per-run rows plus a small
 aggregate summary. Gold tool paths never contain the answer step, so the agent's
-answer call is stripped before path comparison.
+answer call is stripped before path comparison. insight_score is graded by the
+one LLM judge of the pipeline (INSIGHT_JUDGE_MODEL, Kimi K2 Thinking) over the
+gateway, so scoring a run dir needs the gateway credentials in .env.
 """
 
 import json
@@ -85,7 +87,7 @@ def evaluation_metrics(steps, final, task_gold, end, cost_gateway, cost_list):
 
     return {
         "task_completion": int(bool((final.get("text") or "").strip())),
-        "insight_score": None,  # TODO: 0-5 answer quality, computation TBD
+        "insight_score": None,  # filled by add_insight_scores (LLM judge)
         "tool_selection_accuracy": (
             round(len(gold_tools & agent_tools) / len(gold_tools), 3)
             if gold_tools else None),
@@ -138,6 +140,41 @@ def score_run(trace_path, gold):
 METRIC_COLS = ["task_completion", "insight_score", "tool_selection_accuracy",
                "path_efficiency", "cost_usd", "latency_s"]
 
+# The one LLM judge of the scoring pipeline: Kimi K2 Thinking, validated against
+# the 3-rater human panel (kept-44 pairwise exact agreement at the human-human
+# ceiling, see tagging/human_judge_results.ipynb). Do not swap judges per run;
+# insight scores are only comparable when every run is graded by the same judge.
+INSIGHT_JUDGE_MODEL = "vertex_ai/moonshotai/kimi-k2-thinking-maas"
+
+
+def add_insight_scores(scores, model=INSIGHT_JUDGE_MODEL):
+    """Fill the insight_score column in place via the LLM judge (~6s and ~$0.005
+    per task through the gateway). A blank answer is scored 0 without an API
+    call (the rubric's floor for a blank). If the gateway is not configured the
+    column is left empty with a warning, so offline re-scoring still works."""
+    if not len(scores):
+        return scores
+    from .run_judge import judge_one, make_client
+    try:
+        client = make_client()
+    except SystemExit as exc:
+        print(f"insight_score left empty (judge unavailable): {exc}")
+        return scores
+    for idx, row in scores.iterrows():
+        answer = row.get("agent_answer")
+        if not (isinstance(answer, str) and answer.strip()):
+            scores.at[idx, "insight_score"] = 0
+            continue
+        if not (isinstance(row.get("gold_answer"), str) and row.get("question")):
+            continue  # no gold reference to grade against
+        try:
+            result = judge_one(client, model, row)
+        except Exception as exc:
+            print(f"insight_score failed for {row['task_id']}: {exc}")
+            continue
+        scores.at[idx, "insight_score"] = result["judge_score"]
+    return scores
+
 
 def score_dir(trace_dir, out_csv=None):
     """Score every trace in one agent run's directory. The full per-run frame is
@@ -151,6 +188,7 @@ def score_dir(trace_dir, out_csv=None):
     valid = load_valid_task_ids()
     if valid is not None and len(scores):
         scores = scores[scores["task_id"].isin(valid)]
+    scores = add_insight_scores(scores)
     if len(scores):
         out_csv = out_csv or Path(trace_dir) / "scores.csv"
         scores[["task_id", *METRIC_COLS]].sort_values("task_id").to_csv(

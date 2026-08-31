@@ -31,11 +31,15 @@ RESULTS_CSV = REPO_ROOT / "benchmark_outputs" / "results.csv"
 def run_agent_id(run_dir):
     """Agent identity from the first trace's run_start record. The model field is
     the agent; agent_id is the run label and carries the seed suffix, so grouping
-    by it would split one agent's k seed runs into k agents."""
+    by it would split one agent's k seed runs into k agents. The no-tool ablation
+    is the exception: its model field is the underlying LLM, which would merge it
+    with that model's real runs, so it gets its own label."""
     for path in sorted(run_dir.glob("*.jsonl")):
         with open(path, encoding="utf-8") as fh:
             record = json.loads(fh.readline())
         if record.get("type") == "run_start":
+            if (record.get("agent_id") or "").startswith("no-tool-"):
+                return "no-tool-agent"
             return record.get("model") or record.get("agent_id") or run_dir.name
     return run_dir.name
 
