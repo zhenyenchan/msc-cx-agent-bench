@@ -13,6 +13,19 @@ import pandas as pd
 
 from .harness import list_price_cost
 from .tasks_gold import load_gold_tasks
+from .tasks_public import REPO_ROOT
+
+# The tasks that survived annotation pruning (wide human disagreement dropped).
+# Agents still run all 50 tasks and their traces are kept, but scoring and the
+# summary only count these, so every average over tasks divides by 44.
+VALID_TASKS_CSV = REPO_ROOT / "data" / "valid_tasks_public.csv"
+
+
+def load_valid_task_ids():
+    """Set of valid task_ids, or None if the file is absent (score everything)."""
+    if VALID_TASKS_CSV.exists():
+        return set(pd.read_csv(VALID_TASKS_CSV)["task_id"])
+    return None
 
 
 def read_trace(path):
@@ -135,6 +148,9 @@ def score_dir(trace_dir, out_csv=None):
     rows = [row for path in sorted(Path(trace_dir).glob("*.jsonl"))
             if (row := score_run(path, gold)) is not None]
     scores = pd.DataFrame(rows)
+    valid = load_valid_task_ids()
+    if valid is not None and len(scores):
+        scores = scores[scores["task_id"].isin(valid)]
     if len(scores):
         out_csv = out_csv or Path(trace_dir) / "scores.csv"
         scores[["task_id", *METRIC_COLS]].sort_values("task_id").to_csv(

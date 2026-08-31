@@ -21,7 +21,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from .scoring import METRIC_COLS
+from .scoring import METRIC_COLS, load_valid_task_ids
 from .tasks_public import REPO_ROOT
 
 PASS_THRESHOLD = 4  # insight score counted as a pass
@@ -57,12 +57,15 @@ def summarise_agent(runs):
 
 
 def summarise(root):
+    valid = load_valid_task_ids()
     by_agent = {}
     for csv in sorted(Path(root).rglob("scores.csv")):
         df = pd.read_csv(csv)
         if not set(METRIC_COLS) <= set(df.columns):
             print(f"skipping old-format scores.csv: {csv} (re-score the dir)")
             continue
+        if valid is not None:  # a stale 50-task file must not dilute the average
+            df = df[df["task_id"].isin(valid)]
         by_agent.setdefault(run_agent_id(csv.parent), []).append(df)
     results = pd.DataFrame(
         {agent: summarise_agent(runs) for agent, runs in by_agent.items()}).T
