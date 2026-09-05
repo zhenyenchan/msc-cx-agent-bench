@@ -9,8 +9,11 @@ public task loader (R3) — gold fields cannot reach a prompt from here.
 
 import json
 import math
+import platform
+import sys
 import time
 import uuid
+from importlib import metadata
 from pathlib import Path
 
 from .canonical import canonical_call
@@ -23,6 +26,11 @@ from .tool_schemas import (ALLOWED_PARAMS, PARAM_SPECS, REF_PARAMS, TOOL_NAMES,
 STEP_CAP = math.ceil(2.5 * 15)
 TIMEOUT_S = 600
 STALL_LIMIT = 5  # consecutive identical no-tool-call replies before the run ends
+# Token budget per task: cumulative prompt + completion tokens over all steps,
+# as billed. Roughly 38 steps of an 8k-token transcript; a run that spends more
+# is stopped with terminal state token_budget. The per-step completion cap is
+# the agent's MAX_OUTPUT_TOKENS (agents.py).
+TOKEN_BUDGET = 300_000
 
 # What each REF_PARAMS kind prefix means, for corrective bad_ref messages.
 _HANDLE_KINDS = {"s": ("selection", "filter"), "t": ("table", "summarise")}
@@ -179,15 +187,34 @@ def _validate(call, tools, offered=TOOL_NAMES):
     return None, None, False
 
 
+def inference_config(agent):
+    """The exact inference parameters an agent sends, plus the standing note
+    that everything unlisted is the provider default (R10)."""
+    from .agents import UNLISTED_PARAMS_NOTE
+    options = getattr(agent, "request_options", lambda: None)()
+    if options is None:  # minimal agents (tests) expose temperature/seed only
+        options = {"temperature": agent.temperature, "seed": agent.seed}
+    return {"request_options": options, "unlisted_params": UNLISTED_PARAMS_NOTE,
+            "control_notes": list(getattr(agent, "control_notes", []))}
+
+
+def stopping_rules(step_cap=STEP_CAP, timeout_s=TIMEOUT_S,
+                   token_budget=TOKEN_BUDGET):
+    return {"step_cap": step_cap, "timeout_s": timeout_s,
+            "token_budget": token_budget, "stall_limit": STALL_LIMIT}
+
+
 def run_task(agent, task, out_dir, manifest=None, step_cap=STEP_CAP,
-             timeout_s=TIMEOUT_S, tool_schemas=TOOL_SCHEMAS):
+             timeout_s=TIMEOUT_S, tool_schemas=TOOL_SCHEMAS,
+             token_budget=TOKEN_BUDGET):
     """Run one agent on one task; write one append-only JSONL trace; return its path.
 
     tool_schemas is the tool set offered to the agent this run — the full five
     by default; the no-tool ablation passes the answer schema alone. Calls to
     tools outside the offered set are rejected as unknown.
 
-    Terminal states (R6): submitted | stalled | step_cap | timeout | error.
+    Terminal states (R6): submitted | stalled | step_cap | timeout |
+    token_budget | error.
     """
     offered = [schema["function"]["name"] for schema in tool_schemas]
     out_dir = Path(out_dir)
@@ -206,16 +233,26 @@ def run_task(agent, task, out_dir, manifest=None, step_cap=STEP_CAP,
     emit({"type": "run_start", "run_id": run_id, "task_id": task["task_id"],
           "agent_id": agent.agent_id, "model": agent.model,
           "temperature": agent.temperature, "seed": agent.seed,
+          "inference": inference_config(agent),
+          "stopping_rules": stopping_rules(step_cap, timeout_s, token_budget),
           "step_cap": step_cap, "timeout_s": timeout_s,
+          "token_budget": token_budget,
           "manifest": manifest, "ts": time.time()})
 
     terminal, error_note = None, None
     stall_content, stall_count = None, 0
+    tokens_in_total, tokens_out_total = 0, 0
+    served_models = []
     t_start = time.perf_counter()
 
     for idx in range(step_cap):
         if time.perf_counter() - t_start > timeout_s:
             terminal = "timeout"
+            break
+        if tokens_in_total + tokens_out_total > token_budget:
+            terminal = "token_budget"
+            error_note = (f"{tokens_in_total + tokens_out_total} tokens spent, "
+                          f"budget {token_budget}")
             break
 
         t_step = time.perf_counter()
@@ -226,6 +263,10 @@ def run_task(agent, task, out_dir, manifest=None, step_cap=STEP_CAP,
             break
 
         step_latency = round(time.perf_counter() - t_step, 3)
+        tokens_in_total += agent_step.tokens_in or 0
+        tokens_out_total += agent_step.tokens_out or 0
+        if agent_step.served_model and agent_step.served_model not in served_models:
+            served_models.append(agent_step.served_model)
         record = {"type": "step", "idx": idx, "tool": None, "args": None,
                   "handle": None, "canonical_signature": None, "output": None,
                   "status": None, "protocol_violation": False,
@@ -233,6 +274,8 @@ def run_task(agent, task, out_dir, manifest=None, step_cap=STEP_CAP,
                   "tokens_out": agent_step.tokens_out,
                   "latency_s": step_latency,
                   "cost_usd": agent_step.cost_usd,
+                  "served_model": agent_step.served_model,
+                  "finish_reason": agent_step.finish_reason,
                   "raw_response": agent_step.raw_response}
 
         # -- the model produced no structured tool call ------------------------------
@@ -319,6 +362,9 @@ def run_task(agent, task, out_dir, manifest=None, step_cap=STEP_CAP,
     emit({"type": "run_end", "run_id": run_id, "terminal_state": terminal,
           "error": error_note, "final_answer": tools.final,
           "n_tool_calls": len(tools.calls),
+          "tokens_in_total": tokens_in_total,
+          "tokens_out_total": tokens_out_total,
+          "served_models": served_models,
           "wall_s": round(time.perf_counter() - t_start, 3), "ts": time.time()})
     return trace_path
 
@@ -330,6 +376,24 @@ def run_task(agent, task, out_dir, manifest=None, step_cap=STEP_CAP,
 LIST_PRICES = {
     "vertex_ai/gemini-2.5-flash": {"input": 0.30, "cached_input": 0.03,
                                    "output": 2.50},
+    # The five-model comparison (prices read from the routes' listings on
+    # 2026-09-03; OpenRouter passes the upstream list price through).
+    "openai/gpt-5.6-terra": {"input": 2.00, "cached_input": 0.20, "output": 12.00},
+    "openai/gpt-5.6-sol": {"input": 2.00, "cached_input": 0.20, "output": 10.00},
+    "anthropic/claude-sonnet-5": {"input": 2.00, "cached_input": 0.20,
+                                  "output": 10.00},
+    "anthropic/claude-fable-5": {"input": 10.00, "cached_input": 1.00,
+                                 "output": 50.00},
+    "deepseek/deepseek-v3.2": {"input": 0.269, "cached_input": 0.1345,
+                               "output": 0.40},
+    "vertex_ai/deepseek-ai/deepseek-v3.2-maas": {"input": 0.269,
+                                                 "cached_input": 0.1345,
+                                                 "output": 0.40},
+    # the same four models under their Chattermill gateway model-group names
+    "gpt-5.6-terra": {"input": 2.00, "cached_input": 0.20, "output": 12.00},
+    "gpt-5.6-sol": {"input": 2.00, "cached_input": 0.20, "output": 10.00},
+    "claude-sonnet-5": {"input": 2.00, "cached_input": 0.20, "output": 10.00},
+    "claude-fable-5": {"input": 10.00, "cached_input": 1.00, "output": 50.00},
 }
 
 
@@ -360,9 +424,23 @@ def list_price_cost(steps, prices):
     return round(total, 6)
 
 
-def build_manifest(agent):
+def _software_versions():
+    """The client-side stack a run was produced with (R10)."""
+    versions = {}
+    for pkg in ("openai", "ollama", "pandas", "scipy"):
+        try:
+            versions[pkg] = metadata.version(pkg)
+        except metadata.PackageNotFoundError:
+            versions[pkg] = None
+    return {"python": sys.version.split()[0], "platform": platform.platform(),
+            "packages": versions}
+
+
+def build_manifest(agent, step_cap=STEP_CAP, timeout_s=TIMEOUT_S,
+                   token_budget=TOKEN_BUDGET):
     """Provenance for a batch of runs (R10): corpus hashes, tool module hash,
-    generator commit, pinned model info."""
+    generator commit, pinned model info, the exact inference parameters sent,
+    the stopping rules and the software stack."""
     import subprocess
 
     from .tasks_public import DATASET_CSVS, TASKS_PUBLIC_CSV
@@ -384,5 +462,8 @@ def build_manifest(agent):
         "model_info": agent.model_digest(),
         "temperature": agent.temperature,
         "seed": agent.seed,
+        "inference": inference_config(agent),
+        "stopping_rules": stopping_rules(step_cap, timeout_s, token_budget),
+        "software": _software_versions(),
         "list_prices_usd_per_1m": LIST_PRICES.get(agent.model),
     }

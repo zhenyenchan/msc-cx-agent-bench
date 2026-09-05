@@ -1,0 +1,13 @@
+{
+  "description": "Frozen agent seeds for the full agent comparison. Every agent runs once per seed (k=5); summary.py averages per seed then across seeds. Do not edit: regenerate only by changing meta_seed and re-running the snippet.",
+  "meta_seed": 20260903,
+  "draw": "sorted(random.Random(meta_seed).sample(range(1, 10000), 5))",
+  "seeds": [
+    2555,
+    3829,
+    4429,
+    7633,
+    7902
+  ],
+  "frozen_on": "2026-09-03"
+}

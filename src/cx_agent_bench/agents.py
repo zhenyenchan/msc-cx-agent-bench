@@ -15,7 +15,27 @@ import os
 import random
 import re
 import time
+import urllib.request
 from dataclasses import dataclass, field
+from importlib import metadata
+
+# Fixed inference controls, identical for every model in the comparison (R10).
+# Only these parameters are ever sent; every other sampling parameter (top_p,
+# top_k, penalties, thinking budgets) is left at the provider's default and the
+# manifest says so. Decoding is greedy where the API permits (temperature 0) and
+# seeded where the API accepts a seed; hosted endpoints may still ignore the seed.
+TEMPERATURE = 0.0
+MAX_OUTPUT_TOKENS = 4096   # per-step completion cap; the token budget for a
+                           # whole task is enforced by the harness (TOKEN_BUDGET)
+UNLISTED_PARAMS_NOTE = ("all sampling parameters not listed are the provider's "
+                        "defaults for this model")
+
+
+def _package_version(name):
+    try:
+        return metadata.version(name)
+    except metadata.PackageNotFoundError:
+        return None
 
 
 @dataclass
@@ -34,6 +54,8 @@ class AgentStep:
     tokens_out: int | None = None
     latency_s: float | None = None
     cost_usd: float | None = None   # provider-reported USD cost; None if unreported
+    served_model: str | None = None   # model version string the server reports
+    finish_reason: str | None = None  # stop | length | tool_calls ... as reported
     raw_response: dict = field(default_factory=dict)
 
 
@@ -93,16 +115,22 @@ def _tool_calls_from_text(content, tool_names):
 class OllamaAgent:
     """Single-model ReAct agent over Ollama's structured tool-calling API."""
 
-    def __init__(self, model="qwen2.5:7b-instruct", temperature=0.0, seed=42,
-                 num_ctx=16384):
+    def __init__(self, model="qwen2.5:7b-instruct", temperature=TEMPERATURE,
+                 seed=42, num_ctx=16384, max_tokens=MAX_OUTPUT_TOKENS):
         import ollama  # imported here so DummyAgent runs without the dependency
         self._ollama = ollama
         self.model = model
         self.temperature = temperature
         self.seed = seed
         self.num_ctx = num_ctx
+        self.max_tokens = max_tokens
         self.endpoint = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
         self.agent_id = f"ollama-{model.replace(':', '-').replace('/', '-')}"
+
+    def request_options(self):
+        """Exactly the inference parameters sent with every request (R10)."""
+        return {"temperature": self.temperature, "seed": self.seed,
+                "num_ctx": self.num_ctx, "num_predict": self.max_tokens}
 
     def warmup(self):
         """Load the model into Ollama's memory before the first task, so model-load
@@ -111,16 +139,38 @@ class OllamaAgent:
         return True
 
     def model_digest(self):
-        """Pinned model version string for the manifest (R10)."""
+        """Pinned model version for the manifest (R10): the Ollama blob digest
+        (the exact weights + quantisation), model card details, and the server
+        and client versions. Each field degrades to None if unavailable."""
+        out = {"provider": "ollama", "endpoint": self.endpoint,
+               "ollama_python": _package_version("ollama")}
         try:
             info = self._ollama.show(self.model)
-            digest = (getattr(info, "modelinfo", None) or {}).get("general.basename")
             details = getattr(info, "details", None)
-            return {"parameter_size": getattr(details, "parameter_size", None),
-                    "quantization": getattr(details, "quantization_level", None),
-                    "basename": digest}
+            modelinfo = getattr(info, "modelinfo", None) or {}
+            out.update(parameter_size=getattr(details, "parameter_size", None),
+                       quantization=getattr(details, "quantization_level", None),
+                       family=getattr(details, "family", None),
+                       basename=modelinfo.get("general.basename"),
+                       modified_at=str(getattr(info, "modified_at", None)))
+        except Exception as exc:
+            out["show_error"] = f"{type(exc).__name__}: {exc}"
+        try:
+            listed = self._ollama.list()
+            for m in getattr(listed, "models", []) or []:
+                name = getattr(m, "model", None) or getattr(m, "name", None)
+                if name == self.model:
+                    out["digest"] = getattr(m, "digest", None)
+                    out["size_bytes"] = getattr(m, "size", None)
         except Exception:
-            return None
+            out.setdefault("digest", None)
+        try:
+            with urllib.request.urlopen(f"{self.endpoint}/api/version",
+                                        timeout=5) as resp:
+                out["ollama_server"] = json.load(resp).get("version")
+        except Exception:
+            out["ollama_server"] = None
+        return out
 
     def step(self, messages, tool_schemas):
         t0 = time.perf_counter()
@@ -128,8 +178,7 @@ class OllamaAgent:
             model=self.model,
             messages=messages,
             tools=tool_schemas,
-            options={"temperature": self.temperature, "seed": self.seed,
-                     "num_ctx": self.num_ctx},
+            options=self.request_options(),
         )
         latency = time.perf_counter() - t0
 
@@ -149,6 +198,8 @@ class OllamaAgent:
             tokens_in=getattr(response, "prompt_eval_count", None),
             tokens_out=getattr(response, "eval_count", None),
             latency_s=round(latency, 3),
+            served_model=getattr(response, "model", None),
+            finish_reason=getattr(response, "done_reason", None),
             raw_response=raw,
         )
 
@@ -189,9 +240,11 @@ class OpenAICompatAgent:
     is not pinned the way a local quantised model is; model_digest records that
     caveat (R10)."""
 
-    def __init__(self, model, temperature=0.0, seed=42, provider="openrouter",
-                 api_key_env="OPENROUTER_API_KEY", api_base_env=None,
-                 agent_id=None):
+    def __init__(self, model, temperature=TEMPERATURE, seed=42,
+                 provider="openrouter", api_key_env="OPENROUTER_API_KEY",
+                 api_base_env=None, agent_id=None, max_tokens=MAX_OUTPUT_TOKENS,
+                 send_temperature=True, send_seed=True, extra_options=None,
+                 extra_note=None):
         from openai import OpenAI  # imported here so other agents run without it
         try:
             from dotenv import load_dotenv
@@ -210,18 +263,75 @@ class OpenAICompatAgent:
         self.model = model
         self.temperature = temperature
         self.seed = seed
+        self.max_tokens = max_tokens
         self.provider = provider
+        # Some APIs reject temperature (the Claude 5 family: "deprecated for this
+        # model") or have no seed; those controls are then not sent and the
+        # omission is recorded in the manifest rather than silently dropped.
+        self.send_temperature = send_temperature
+        self.send_seed = send_seed
+        self.control_notes = []
+        if not send_temperature:
+            self.control_notes.append(
+                "temperature not sent: the API rejects it for this model, so "
+                "decoding runs at the model's default")
+        if not send_seed:
+            self.control_notes.append(
+                "seed not sent: the API has no seed parameter; the seed labels "
+                "the replicate only")
+        # Parameters an API *requires* for this architecture (e.g. GPT-5.6 on
+        # chat completions only accepts function tools with reasoning_effort
+        # 'none'); sent with every request and explained in the manifest.
+        self.extra_options = dict(extra_options or {})
+        if self.extra_options:
+            self.control_notes.append(
+                extra_note or f"also sent: {json.dumps(self.extra_options)}")
         slug = (model.split("/", 1)[1] if "/" in model else model)
         self.agent_id = (agent_id
                          or f"{provider}-{slug.replace('/', '-').replace(':', '-')}")
+
+    def request_options(self):
+        """Exactly the inference parameters sent with every request (R10)."""
+        options = {}
+        if self.send_temperature:
+            options["temperature"] = self.temperature
+        if self.send_seed:
+            options["seed"] = self.seed
+        options["max_tokens"] = self.max_tokens
+        options.update(self.extra_options)
+        return options
+
+    def _openrouter_model_card(self):
+        """OpenRouter's public listing for the model: pricing, the parameters
+        the route supports (a silently-dropped parameter shows up here as
+        missing) and context length. None off OpenRouter or on any failure."""
+        if "openrouter.ai" not in self.endpoint:
+            return None
+        try:
+            with urllib.request.urlopen("https://openrouter.ai/api/v1/models",
+                                        timeout=20) as resp:
+                models = json.load(resp)["data"]
+            card = next(m for m in models if m["id"] == self.model)
+            return {"name": card.get("name"), "created": card.get("created"),
+                    "context_length": card.get("context_length"),
+                    "supported_parameters": card.get("supported_parameters"),
+                    "pricing_usd_per_token": card.get("pricing"),
+                    "top_provider": card.get("top_provider")}
+        except Exception as exc:
+            return {"error": f"{type(exc).__name__}: {exc}"}
 
     def warmup(self):
         """Nothing to load locally. Returns False."""
         return False
 
     def model_digest(self):
-        return {"provider": self.provider,
-                "note": "hosted; served model version not pinned by the API"}
+        return {"provider": self.provider, "endpoint": self.endpoint,
+                "requested_model": self.model,
+                "openai_python": _package_version("openai"),
+                "openrouter_model_card": self._openrouter_model_card(),
+                "note": ("hosted; the served version string is whatever the "
+                         "endpoint reports per response, recorded on every step "
+                         "as served_model and summarised in run_end")}
 
     def step(self, messages, tool_schemas):
         t0 = time.perf_counter()
@@ -229,19 +339,27 @@ class OpenAICompatAgent:
             model=self.model,
             messages=_to_openai_messages(messages),
             tools=tool_schemas,
-            temperature=self.temperature,
-            seed=self.seed,
+            **self.request_options(),
         )
         latency = time.perf_counter() - t0
         response = raw_http.parse()
         # litellm-proxy gateways report the request's actual USD cost, computed
-        # against the operator's price table, in a response header.
+        # against the operator's price table, in a response header; OpenRouter
+        # reports it inside the usage block instead.
         try:
             cost = float(raw_http.headers.get("x-litellm-response-cost"))
         except (TypeError, ValueError):
             cost = None
+        if cost is None:
+            usage_extra = getattr(getattr(response, "usage", None),
+                                  "model_extra", None) or {}
+            try:
+                cost = float(usage_extra.get("cost"))
+            except (TypeError, ValueError):
+                cost = None
 
-        message = response.choices[0].message
+        choice = response.choices[0]
+        message = choice.message
         calls = []
         for tc in (message.tool_calls or []):
             try:
@@ -267,6 +385,8 @@ class OpenAICompatAgent:
             tokens_out=getattr(usage, "completion_tokens", None),
             latency_s=round(latency, 3),
             cost_usd=cost,
+            served_model=getattr(response, "model", None),
+            finish_reason=getattr(choice, "finish_reason", None),
             raw_response=raw,
         )
 
@@ -318,12 +438,15 @@ class DummyAgent:
         self.agent_id = ("dummy-null" if mode == "null"
                          else f"dummy-random-s{seed}")
 
+    def request_options(self):
+        return {}
+
     def warmup(self):
         """No model to load. Returns False."""
         return False
 
     def model_digest(self):
-        return None
+        return {"provider": "in-process", "note": "model-free floor"}
 
     def _guess(self, question):
         from .tool_schemas import ASPECTS, INDUSTRIES, ORGS
@@ -388,5 +511,6 @@ class DummyAgent:
         return AgentStep(
             tool_calls=[ToolCallReq(name="answer", args=args)],
             tokens_in=0, tokens_out=0, latency_s=0.0,
+            served_model=self.model, finish_reason="tool_calls",
             raw_response={"dummy": self.mode},
         )

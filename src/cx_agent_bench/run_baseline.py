@@ -17,8 +17,8 @@ import time
 from pathlib import Path
 
 from .agents import DummyAgent, OllamaAgent, OpenAICompatAgent
-from .harness import (STEP_CAP, TIMEOUT_S, build_manifest, list_price_cost,
-                      run_task)
+from .harness import (STEP_CAP, TIMEOUT_S, TOKEN_BUDGET, build_manifest,
+                      list_price_cost, run_task)
 from .tool_schemas import TOOL_SCHEMAS
 from .tasks_public import REPO_ROOT, load_public_tasks
 
@@ -54,6 +54,8 @@ def write_logs_csv(out_dir):
                 "tokens_out": s["tokens_out"],
                 "latency_s": s["latency_s"],
                 "cost_usd": s.get("cost_usd"),
+                "served_model": s.get("served_model") or "",
+                "finish_reason": s.get("finish_reason") or "",
                 "output": json.dumps(s["output"], ensure_ascii=False, default=str),
                 "answer": final.get("text", "") if s["tool"] == "answer" else "",
                 "raw_response": json.dumps(s["raw_response"], ensure_ascii=False,
@@ -120,9 +122,16 @@ def write_log_report(out_dir, endpoint, model, n_tasks, total_s):
     gateway_cost = (sum(s.get("cost_usd") or 0 for s in steps)
                     if any(s.get("cost_usd") is not None for s in steps) else None)
     manifest_file = Path(out_dir) / "manifest.json"
-    prices = (json.loads(manifest_file.read_text(encoding="utf-8"))
-              .get("list_prices_usd_per_1m") if manifest_file.exists() else None)
+    manifest = (json.loads(manifest_file.read_text(encoding="utf-8"))
+                if manifest_file.exists() else {})
+    prices = manifest.get("list_prices_usd_per_1m")
     list_cost = list_price_cost(steps, prices)
+    rules = manifest.get("stopping_rules") or {}
+    step_cap = rules.get("step_cap", STEP_CAP)
+    timeout_s = rules.get("timeout_s", TIMEOUT_S)
+    token_budget = rules.get("token_budget", TOKEN_BUDGET)
+    served = sorted({m for e in ends for m in (e.get("served_models") or [])})
+    inference = (manifest.get("inference") or {}).get("request_options")
 
     n_submitted = sum(e["terminal_state"] == "submitted" for e in ends)
     no_call_ids = sorted({s["_task_id"] for s in no_call})
@@ -132,7 +141,10 @@ def write_log_report(out_dir, endpoint, model, n_tasks, total_s):
     hours, rest = divmod(int(total_s), 3600)
     lines = [
         f"model: {model}",
+        f"served model version(s): {', '.join(served) or 'not reported'}",
         f"endpoint: {endpoint}",
+        f"seed: {manifest.get('seed', 'n/a')}",
+        f"inference: {json.dumps(inference) if inference is not None else 'n/a'}",
         f"total time: {hours}h {rest // 60}m {rest % 60}s",
         "total cost (USD): "
         f"{_money(gateway_cost)} (gateway) / {_money(list_cost)} (list prices)",
@@ -152,9 +164,12 @@ def write_log_report(out_dir, endpoint, model, n_tasks, total_s):
         f"gold steps: {GOLD_STEPS_TOTAL} (fixed)",
         "",
         "terminated task_ids:",
-        f"reached step cap (38): {tasks_in('step_cap')}",
-        f"reached timeout (600s): {tasks_in('timeout')}",
-        f"reached loop cap (5 consecutive identical replies): {tasks_in('stalled')}",
+        f"reached step cap ({step_cap}): {tasks_in('step_cap')}",
+        f"reached timeout ({timeout_s}s): {tasks_in('timeout')}",
+        f"reached token budget ({token_budget}): {tasks_in('token_budget')}",
+        f"reached loop cap ({rules.get('stall_limit', 5)} consecutive identical "
+        f"replies): {tasks_in('stalled')}",
+        f"provider/agent error: {tasks_in('error')}",
         "",
         "error analysis:",
         f"{'error_kind':<20} {'steps':>5}  protocol_violation",
@@ -173,6 +188,15 @@ def write_log_report(out_dir, endpoint, model, n_tasks, total_s):
 # qwen2.5-7b is not served by Vertex AI (404 in the gateway's project/region);
 # the qwen the gateway can serve is the Qwen3-Next 80B MaaS model.
 CHATTERMILL_DEFAULT_MODEL = "vertex_ai/qwen/qwen3-next-80b-a3b-instruct-maas"
+
+
+# The frozen seeds for the full agent comparison (k=5), drawn once and never
+# edited; every agent runs the suite once per seed.
+SEEDS_PATH = Path(__file__).with_name("seeds.json")
+
+
+def load_seeds(path=SEEDS_PATH):
+    return list(json.loads(Path(path).read_text(encoding="utf-8"))["seeds"])
 
 
 def make_agent(name, seed, model=None):
@@ -209,7 +233,7 @@ def select_tasks(task_ids=None, limit=None):
 
 
 def run_suite(agent, tasks, out_dir, step_cap=STEP_CAP, timeout_s=TIMEOUT_S,
-              tool_schemas=TOOL_SCHEMAS):
+              tool_schemas=TOOL_SCHEMAS, token_budget=TOKEN_BUDGET):
     """Manifest, warmup, the run loop with per-task progress, step log and
     report — the whole execution pipeline, shared by every runner script.
 
@@ -218,13 +242,16 @@ def run_suite(agent, tasks, out_dir, step_cap=STEP_CAP, timeout_s=TIMEOUT_S,
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    manifest = build_manifest(agent)
+    manifest = build_manifest(agent, step_cap, timeout_s, token_budget)
     manifest["offered_tools"] = [s["function"]["name"] for s in tool_schemas]
     (out_dir / "manifest.json").write_text(json.dumps(manifest, indent=2),
                                            encoding="utf-8")
 
-    print(f"agent={agent.agent_id}  tasks={len(tasks)}  step_cap={step_cap}  "
-          f"timeout={timeout_s}s\ntraces -> {out_dir}")
+    print(f"agent={agent.agent_id}  tasks={len(tasks)}  seed={agent.seed}  "
+          f"step_cap={step_cap}  timeout={timeout_s}s  "
+          f"token_budget={token_budget}\n"
+          f"inference={json.dumps(manifest['inference']['request_options'])}\n"
+          f"traces -> {out_dir}")
 
     print(f"loading model ({agent.model}) ...", flush=True)
     t_load = time.perf_counter()
@@ -238,7 +265,7 @@ def run_suite(agent, tasks, out_dir, step_cap=STEP_CAP, timeout_s=TIMEOUT_S,
         t0 = time.perf_counter()
         trace = run_task(agent, task, out_dir, manifest=manifest,
                          step_cap=step_cap, timeout_s=timeout_s,
-                         tool_schemas=tool_schemas)
+                         tool_schemas=tool_schemas, token_budget=token_budget)
         durations.append(time.perf_counter() - t0)
         last = json.loads(Path(trace).read_text(encoding="utf-8").splitlines()[-1])
 
@@ -281,19 +308,29 @@ def main():
                         help="task ids to run (default: all)")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--all-seeds", action="store_true",
+                        help=f"run the suite once per frozen seed in {SEEDS_PATH.name} "
+                             "(one trace directory per seed, suffixed _s<seed>)")
     parser.add_argument("--step-cap", type=int, default=STEP_CAP)
     parser.add_argument("--timeout", type=int, default=TIMEOUT_S)
+    parser.add_argument("--token-budget", type=int, default=TOKEN_BUDGET,
+                        help="cumulative prompt+completion tokens per task")
     parser.add_argument("--out", default=None,
                         help="trace directory (default: traces/baseline/<agent>_<ts>)")
     args = parser.parse_args()
 
-    agent = make_agent(args.agent, args.seed, model=args.model)
     tasks = select_tasks(args.tasks, args.limit)
-    out_dir = Path(args.out) if args.out else (
-        REPO_ROOT / "traces" / "baseline"
-        / f"{agent.agent_id}_{time.strftime('%Y%m%d_%H%M%S')}")
-    if tasks:
-        run_suite(agent, tasks, out_dir, args.step_cap, args.timeout)
+    if not tasks:
+        return
+    stamp = time.strftime("%Y%m%d_%H%M%S")
+    for seed in (load_seeds() if args.all_seeds else [args.seed]):
+        agent = make_agent(args.agent, seed, model=args.model)
+        out_dir = Path(args.out) if args.out else (
+            REPO_ROOT / "traces" / "baseline" / f"{agent.agent_id}_{stamp}")
+        if args.all_seeds:
+            out_dir = out_dir.with_name(f"{out_dir.name}_s{seed}")
+        run_suite(agent, tasks, out_dir, args.step_cap, args.timeout,
+                  token_budget=args.token_budget)
 
 
 if __name__ == "__main__":

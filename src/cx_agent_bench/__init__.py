@@ -11,4 +11,4 @@ Modules
     scoring       reads traces from disk and computes metrics
 """
 
-HARNESS_VERSION = "0.1.0"
+HARNESS_VERSION = "0.2.0"  # 0.2: inference / stopping-rule / served-model logging
