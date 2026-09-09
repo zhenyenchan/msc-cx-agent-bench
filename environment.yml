@@ -1,0 +1,6 @@
+name: cx-agent
+channels:
+  - defaults
+dependencies:
+  - python=3.13.5
+prefix: C:\Users\User\miniconda3\envs\cx-agent

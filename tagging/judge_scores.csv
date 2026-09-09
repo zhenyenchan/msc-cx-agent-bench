@@ -1,0 +1,180 @@
+task_id,judge_score,judge_reasoning,latency_s,cost_usd
+T1-E1,5,"The agent's answer perfectly matches the gold-standard answer. It correctly states the proportion of negative Banking reviews mentioning the app or website as 18.7%. Furthermore, it includes the exact supporting numbers (80 out of 427 mentions) provided in the gold answer. There are no missing elements, inaccuracies, or contradictions. 
+
+<insight_score>5</insight_score>",4.53,0.005466
+T1-E2,0,"The gold answer provides a specific proportion (86.8%) and the exact counts (402 out of 463) for positive Fashion reviews mentioning ease of use. In contrast, the agent completely fails to answer the question, incorrectly claiming that the aspect 'ease of use' does not exist in the dataset. Because the agent provides a refusal and does not answer the question asked, it receives the lowest possible score according to the rubric.
+
+<insight_score>0</insight_score>",4.63,0.006478
+T1-H1,5,"The agent's answer perfectly matches the gold-standard answer. It provides the exact correct proportion (21.3%) and includes the correct supporting numbers (117 out of 549). There is no ""catch"" required for this question, and the agent includes all necessary information without any contradictions or errors. 
+
+<insight_score>5</insight_score>",3.16,0.004444
+T1-H2,0,"The agent completely fails to answer the question. While the gold answer provides a specific proportion (10.9%) and the exact counts (43 out of 396) for negative reviews mentioning staff attitude in Price Comparison, the agent incorrectly claims that the aspect 'staff attitude' does not exist in the dataset and provides no answer. This is a direct contradiction of the gold answer and constitutes a refusal/failure to answer the prompt. Therefore, it receives the lowest possible score.
+
+<insight_score>0</insight_score>",4.83,0.006002
+T1-H3,4,"The agent correctly determines that no proportion can be reported and accurately identifies the ""catch""—the sample size is too small because it falls below the minimum threshold of 30 mentions. However, the agent states there are ""fewer than 30 mentions"" but omits the exact count of 3 reviews provided in the gold answer. Because the exact supporting figure is missing, it is a minor omission of a non-essential part (the threshold being the most critical detail). 
+
+<insight_score>4</insight_score>",9.45,0.012534
+T10-E1,3,"The agent successfully addresses all parts of the prompt, providing the correct overall sentiment percentages, identifying the correct top 3 issues with their accurate negative sentiment rates, and correctly concluding that the differences against the industry average are not statistically significant. The improvement roadmap also aligns well with the gold standard's direction. 
+
+However, the agent provides incorrect mention counts for the top 3 issues (stating 35, 35, and 26 instead of 40 for all three). Additionally, the industry average percentages provided by the agent (95.0% and 85.8%) differ from the gold standard (93.1% and 86.2%), and one of the p-values is slightly off (0.105 vs 0.104). Because several key supporting numbers are incorrect despite the overall direction being right, it earns a score of 3.
+
+<insight_score>3</insight_score>",8.87,0.016059999999999998
+T10-E2,3,"The agent correctly identifies the overall sentiment breakdown and accurately lists the top 3 issues with their corresponding negative sentiment rates and mention counts. The improvement roadmap also aligns well with the identified issues. 
+
+However, the agent makes errors in the industry comparison section. It provides an incorrect industry average for staff attitude (88.3% instead of the gold standard's 90.0%). Furthermore, it fails to accurately report the requested statistical significance test, claiming the test is ""not reliable due to insufficient data"" rather than stating it is not statistically significant with a p-value of 0.224. 
+
+Because the agent provides the correct overall direction and gets most of the complex data right, but includes a wrong key number and misses the specific ""catch"" (the actual statistical significance result), it earns a score of 3.
+
+<insight_score>3</insight_score>",9.21,0.016371999999999998
+T10-H1,2,"The agent correctly identifies the overall sentiment, the top 3 issues with their exact percentages and mention counts, and provides a relevant improvement roadmap. However, the agent completely fails the industry comparison and statistical significance test. The gold answer states the industry average for phone support is 74.5% and the difference is not statistically significant (p = 0.290). The agent contradicts this by claiming the industry average is 55.5% and that the difference is statistically significant (p = 0.0034). Because the agent provides a wrong verdict on the statistical significance (saying it is significant when it is not) and includes contradicting numbers for a key part of the prompt, it receives a score of 2.
+
+<insight_score>2</insight_score>",9.63,0.017782
+T10-H2,2,"The agent's answer correctly identifies the overall sentiment percentages and the top 3 issues by negative sentiment rate. However, it contains several major factual errors compared to the gold standard:
+1. The mention counts for the top 3 issues are completely wrong (e.g., 130 instead of 262 for 'app or website').
+2. The industry average for 'app or website' is incorrect (32.5% instead of 48.1%).
+3. Most importantly, the agent provides the wrong verdict on the statistical significance test, claiming the difference is statistically significant when the gold answer explicitly states it is not. 
+
+Because the agent gets the direction of the statistical significance test wrong and includes multiple incorrect supporting numbers, it fails to meet the criteria for a higher score.
+
+<insight_score>2</insight_score>",7.68,0.013288000000000001
+T10-H3,5,"The agent's response is highly accurate and captures all the essential insights from the gold answer. It correctly identifies the ""catch"" that there is insufficient data to rank the top 3 issues, explicitly noting that only 'account-access' meets the 30-mention reliability threshold. The agent also perfectly matches all the key numbers provided in the gold answer, including the 35.0% negative rate for Lumora, the 36.7% industry average, and the exact p-value (0.8653) indicating no statistical significance. 
+
+While the gold answer states a roadmap cannot be created due to insufficient data and the agent provides a brief one anyway, the agent's roadmap is simply a logical recommendation to focus on the single valid issue ('account-access'). This does not materially contradict the core data insights, which the agent handled flawlessly.
+
+<insight_score>5</insight_score>",12.0,0.018654
+T2-E1,5,"The agent's answer perfectly matches the gold standard. It correctly identifies the total number of mentions (1532) and accurately provides the sentiment breakdown as percentages: 72.8% negative, 5.2% neutral, and 22.1% positive. The agent also includes the absolute counts for each sentiment, which is an extra detail that does not contradict the gold answer. The response is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",4.9,0.006457999999999999
+T2-E2,5,"The agent's answer perfectly matches the gold standard. It correctly identifies the sentiment breakdown as 65.6% positive, 32.8% negative, and 1.6% neutral. It also correctly states the total number of mentions/reviews as 1044. The agent includes the absolute counts for each sentiment category, which is an extra helpful detail that does not contradict the gold answer. The response is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",4.26,0.006451999999999999
+T2-H1,5,"The agent's answer perfectly matches the gold standard. It correctly identifies the sentiment breakdown for Vanter Financial as 60.2% positive, 28.3% negative, and 11.4% neutral. Additionally, the agent provides the exact mention counts for each sentiment, which correctly sum up to the 420 total mentions noted in the gold answer. The response is relevant, accurate, and complete, with no missing information or contradictions. 
+
+<insight_score>5</insight_score>",4.45,0.006302
+T2-H2,5,"The agent's answer perfectly matches the gold-standard answer. It correctly identifies the total number of reviews (805) and provides the exact sentiment breakdown as requested: 84.1% positive, 15.5% negative, and 0.4% neutral. There are no missing details, factual errors, or contradictions. The response is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",4.25,0.00588
+T2-H3,5,"The agent's answer is perfectly accurate and complete. It correctly identifies the sentiment breakdown for Sable Row as 69.5% positive, 30.2% negative, and 0.3% neutral, which matches the gold answer exactly. Additionally, the agent provides the absolute counts for each sentiment, which sum up to the 925 total mentions noted in the gold answer. There are no errors, omissions, or contradictions. 
+
+<insight_score>5</insight_score>",4.49,0.0069299999999999995
+T3-E1,5,"The agent's answer perfectly matches the gold-standard answer. It correctly identifies the top 3 topics with the most complaints in Travel Booking (app-website, account-access, and email) and provides the exact corresponding numbers (215, 149, and 138). The slight variations in naming (e.g., ""app-website"" instead of ""app or website"", ""email"" instead of ""email support"") are purely stylistic and do not change the meaning or accuracy of the response. The answer is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",4.14,0.005442
+T3-E2,5,"The agent's answer perfectly matches the gold answer. It correctly identifies the top 3 topics with the most complaints in Groceries as app-website, ease-of-use, and email. It also provides the exact correct numbers for each topic (383, 215, and 100 mentions, respectively). There is no ""catch"" required for this question, and the agent includes no contradictory information. The response is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",3.79,0.005182
+T3-H1,5,"The agent's answer perfectly matches the gold-standard answer. It correctly identifies the top 3 topics with the most complaints in Fashion (app-website, general-satisfaction, and speed) and provides the exact corresponding numbers (241, 160, and 117) for each topic. There are no missing elements, factual errors, or contradictions. The slight variation in formatting (using hyphens instead of spaces) does not affect the accuracy or completeness of the response. 
+
+<insight_score>5</insight_score>",3.43,0.0049180000000000005
+T3-H2,5,"The agent's answer perfectly matches the gold-standard answer. It correctly identifies the top 3 topics with the most complaints in Price Comparison (app-website, price-value-for-money, and general-satisfaction) and provides the exact correct numbers for each (148, 65, and 48 mentions, respectively). The slight variation in formatting (using hyphens instead of spaces) does not affect the accuracy or completeness of the answer. There is no ""catch"" required for this question. Therefore, the agent's response is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",4.24,0.006328
+T3-H3,5,"The agent correctly provides the verdict (""No answer"") and accurately identifies the reason: there is only one topic available for Consulting, which is ""account-access"". While the agent includes additional details about a 30-mention threshold and specific mention counts, the evaluation rules state that extra claims are neither rewarded nor penalized as long as they do not contradict the gold answer. The agent successfully captures the core insight and matches the gold standard's conclusion perfectly. 
+
+<insight_score>5</insight_score>",6.66,0.009553999999999998
+T4-E1,5,"The agent correctly identifies the verdict, stating that Ride Hailing has a higher negative sentiment rate for price and value for money compared to Banking. The agent also provides the exact correct numbers, citing 75.8% for Ride Hailing and 20.0% for Banking. The additional information provided by the agent (mention counts and the percentage point difference) does not contradict the gold answer and is acceptable under the evaluation rules. The answer is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",4.27,0.00633
+T4-E2,5,"The agent correctly identifies that Travel Booking has a higher negative sentiment rate for app/website reviews compared to Fashion. It also provides the exact percentages matching the gold answer (44.1% for Travel Booking and 27.9% for Fashion). The agent includes additional information (review counts and statistical significance), which, according to the evaluation rules, is neither rewarded nor penalised. The answer is relevant, accurate, and complete, meeting all the criteria for a perfect score.
+
+<insight_score>5</insight_score>",4.54,0.006492
+T4-H1,0,"The agent failed to answer the question, incorrectly stating that the aspect 'ease of use' is not present in the dataset. It provided no verdict and no numbers, completely missing the insights from the gold answer (Groceries having a higher negative sentiment rate of 42.4% compared to Trading's 10.9%). According to the evaluation rubric, a refusal or failure to answer the question results in a score of 0.
+
+<insight_score>0</insight_score>",3.81,0.005106
+T4-H2,5,"The agent's answer perfectly matches the gold-standard answer. It correctly states that no comparison can be made (the verdict) and accurately identifies the reason: there are no reviews mentioning 'ease-of-use' in the Consulting industry (the catch). There are no missing numbers or contradictions. The response is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",3.43,0.004764
+T4-H3,5,"The agent's answer perfectly matches the gold-standard answer. It correctly states the verdict (""No answer"") and provides the exact same reasoning: there are no reviews mentioning price and value for money in either the Consulting or Streaming industries, making a comparison impossible. There are no numbers or specific ""catches"" required for this question. The agent's response is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",3.42,0.0051199999999999996
+T5-E1,5,"The agent's answer perfectly matches the gold standard. 
+
+1. **The verdict:** The agent correctly states that there is no statistically significant difference between the two companies.
+2. **The numbers:** The agent accurately reports the negative sentiment rates for CompareHive (10.7%) and Tallywise (15.3%). 
+3. **The catch:** The agent correctly includes the p-value (p=0.315) to support the lack of statistical significance. 
+
+The agent also includes some extra, helpful context (the raw counts and the percentage point difference) which does not contradict the gold answer. The response is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",5.63,0.008882
+T5-E2,5,"The agent correctly answers the question with a ""Yes"" and accurately states that the negative sentiment rates for general satisfaction are significantly different between the two companies. It provides the exact percentages required by the gold answer: 43.9% for Trippa and 22.1% for Roamly. Furthermore, the agent successfully includes the ""catch"" by confirming the statistical significance of this difference, providing a p-value of 0.0008 (which aligns perfectly with the gold answer's rounded p = 0.001). The additional context provided by the agent (mention counts and percentage point difference) is accurate and does not contradict the gold standard. The response is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",5.3,0.008412
+T5-H1,0,"The agent fails to answer the question, explicitly stating ""No answer"" and incorrectly claiming that the necessary data is not present in the dataset. In contrast, the gold answer provides a clear ""No,"" along with the specific negative sentiment rates (48.1% and 47.4%) and the p-value (0.853) to prove the difference is not statistically significant. Because the agent provides a refusal based on a false premise and completely misses the verdict, numbers, and the catch, it receives the lowest possible score.
+
+<insight_score>0</insight_score>",5.67,0.00766
+T5-H2,5,"The agent correctly provides the verdict ""No answer,"" matching the gold standard. Both the agent and the gold answer identify that the analysis cannot be performed due to a lack of data. While the gold answer specifies that there is ""insufficient data to run a reliable two-proportion z-test,"" the agent states that the aspects are ""not found in the dataset."" These explanations are functionally equivalent in this context, as both correctly recognize the data limitations preventing the statistical comparison. The agent's response is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",10.61,0.014024000000000002
+T5-H3,5,"The agent correctly identifies the verdict as ""No answer"" and accurately explains the ""catch"" that the data is insufficient to run a reliable two-proportion z-test. The agent goes a step further by providing the exact counts (12, 8, 13, 12) to explain why the test is unreliable (one cell has fewer than 10 observations). These extra details support the gold answer's conclusion and do not contradict it. The response is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",4.82,0.006844
+T6-E1,5,"The agent's answer is highly accurate and perfectly aligns with the gold standard. It correctly identifies the industry average negative sentiment rate for the 'app-website' aspect as 18.7%. It also correctly lists the four organisations that meet the threshold of at least 30 mentions (Northeast Bank, Kestrel Bank, Vanter Financial, and Halden Savings) along with their exact negative sentiment rates, matching the gold answer perfectly. While the agent does not explicitly use the words ""above average"" or ""below average,"" it provides the exact figures alongside the industry average, directly answering the prompt's request to show how they compare and providing each organisation's rate. The inclusion of mention counts is a helpful addition that confirms the >30 mentions rule was applied. 
+
+<insight_score>5</insight_score>",6.24,0.009850000000000001
+T6-E2,4,"The agent successfully identifies the industry average (25.5%) and correctly lists the negative sentiment rates for the four organisations that meet the threshold of at least 30 total mentions (Trippa at 43.9%, Roamly at 22.1%, Journeo at 19.6%, and Wayfare at 8.9%). The agent's mention counts represent the negative mentions, and the underlying total mentions for each correctly exceed the 30-mention threshold requested in the prompt. 
+
+However, the prompt specifically asks *how* the organisations compare to the industry average. While the agent provides all the necessary numbers to make this comparison, it fails to explicitly state the verdict (that Trippa is above the industry average, while the other three are below it). Because it misses this explicit comparative verdict but gets all the data and filtering correct, it earns a 4.
+
+<insight_score>4</insight_score>",12.77,0.018632000000000003
+T6-H1,5,"The agent successfully answers the question by providing the correct industry average negative sentiment rate (27.5%) for the app/website aspect in the Fashion industry. It also correctly identifies all the relevant organisations that meet the threshold of at least 30 mentions and provides their exact negative sentiment rates: Marbrook (37.3%), Northerly (32.8%), Vella & Co (18.6%), and Sable Row (18.2%). 
+
+While the agent does not explicitly use the words ""above average"" or ""below average"" like the gold answer does, it clearly sets up the comparison by providing the industry average first and then listing each organisation's specific rate, which perfectly fulfills the prompt's request. The inclusion of the raw mention counts is an extra detail that does not contradict the gold answer. The response is accurate, complete, and perfectly aligned with the gold standard.
+
+<insight_score>5</insight_score>",6.88,0.010280000000000001
+T6-H2,5,"The agent correctly provides the verdict of ""No answer"" and explains that a comparison cannot be made. While the gold answer specifies that there are *no* reviews at all for the app or website in the Consulting industry, the agent states that there are not *at least 30* mentions. Since the prompt explicitly asked to ignore organisations with less than 30 mentions, the agent's reasoning perfectly aligns with the constraints of the question and leads to the exact same, correct conclusion. The answer is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",5.25,0.007776
+T6-H3,5,"The agent's answer perfectly matches the gold-standard answer. Both correctly state that there is no answer to the question because there are no mentions or reviews regarding ""general satisfaction"" for the ""Streaming"" industry in the dataset. The agent accurately captures the verdict and the reason why no comparison can be made. There are no missing numbers or catches, as the lack of data makes them inapplicable. 
+
+<insight_score>5</insight_score>",5.41,0.00518
+T7-E1,5,"The agent successfully identifies the biggest driver of dissatisfaction at Northeast Bank as email support, matching the gold answer's verdict. It correctly ranks the top three topics by negative sentiment rate: email (87.5%), discounts and promotions (82.5%), and attitude of staff (77.5%). The agent also includes the mention counts for each topic, demonstrating that it correctly applied the filter to ignore topics with fewer than 30 mentions. The answer is relevant, accurate, complete, and contains no contradictions to the gold standard. 
+
+<insight_score>5</insight_score>",4.72,0.006904
+T7-E2,5,"The agent correctly identifies ""account-access"" as the biggest driver of dissatisfaction at Wayfare. It accurately ranks the top three topics by negative sentiment rate: account-access (92.5%), email (85.0%), and phone (67.5%). The agent also includes the mention counts, showing that it adhered to the constraint of ignoring topics with fewer than 30 mentions (all listed topics have 40 mentions). The verdict, numbers, and ranking perfectly match the gold-standard answer. There are no missing elements or contradictions. 
+
+<insight_score>5</insight_score>",5.73,0.007364
+T7-H1,3,"The agent correctly identifies 'attitude-of-staff' as the biggest driver of dissatisfaction and provides the accurate negative sentiment rate of 78.6%. However, the user's prompt explicitly asked to ""Rank topics by negative sentiment rate"". The agent failed to provide this ranking and omitted the other qualifying topics (general satisfaction at 30.8% and speed at 30.0%) that were included in the gold answer. Because a key requested part of the question (the ranking and its associated numbers) is completely missing, the answer cannot score higher than a 3. 
+
+<insight_score>3</insight_score>",8.6,0.012404
+T7-H2,3,"The agent correctly identifies the biggest driver of dissatisfaction as 'phone' (phone support) and provides the accurate negative sentiment rate of 52.5%. It also correctly notes that the topic meets the threshold of having at least 30 mentions. 
+
+However, the agent completely fails to address the second part of the user's prompt: ""Rank topics by negative sentiment rate"". The gold answer provides this ranking by including the subsequent topics (price and value for money at 41.2%, and staff attitude at 31.5%). Because the agent omitted this requested ranking, it is missing key numbers and a required part of the answer. 
+
+According to the rubric, an answer with the correct direction but missing key numbers or requested parts receives a score of 3.
+
+<insight_score>3</insight_score>",8.4,0.011335999999999999
+T7-H3,5,"The agent correctly provides the same verdict as the gold answer: ""No answer."" It accurately identifies the reason, which is that the number of mentions (28) falls below the requested threshold of 30 mentions. By stating that Pinecast as a whole only has 28 mentions, it perfectly explains why no individual topic could meet the 30-mention minimum required by the prompt. The answer is relevant, accurate, complete, and contains no contradictions to the gold standard. 
+
+<insight_score>5</insight_score>",5.5,0.007794000000000001
+T8-E1,5,"The agent correctly identifies the top two issues Wayfare should address first: app-website and account-access, in the correct order. It also provides the exact priority scores matching the gold answer (0.1273 for app-website and 0.0575 for account-access). The agent includes additional supporting numbers (negative mentions, total mentions, and negative rates) which provide helpful context and do not contradict the gold answer. The response is fully accurate, relevant, and complete according to the provided rubric.
+
+<insight_score>5</insight_score>",4.44,0.0064659999999999995
+T8-E2,5,"The agent correctly identifies the top two issues to address as ""app-website"" and ""ease-of-use"", which perfectly matches the verdict in the gold answer. The priority scores provided by the agent (0.137 and 0.120) are accurate and match the gold answer's scores (0.1373 and 0.1196) when rounded to three decimal places. The agent also includes extra context regarding the negative mentions and rates, which is helpful and does not contradict the gold answer. The response is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",5.33,0.008314
+T8-H1,5,"The agent correctly identifies 'speed' and 'phone' as the top two issues to address first, which perfectly matches the verdict in the gold answer. The agent also provides the priority scores for both aspects (0.057 for speed and 0.041 for phone), which are accurate, correctly rounded versions of the gold answer's exact figures (0.0566 and 0.0412). There is no specific ""catch"" required by the gold answer. The additional context provided by the agent regarding the number of negative mentions confirms it followed the rule to ignore aspects with fewer than 30 negative reviews, and it does not contradict the gold answer. The response is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",5.83,0.009637999999999999
+T8-H2,5,"The agent correctly identifies 'app-website' as the top issue to address first, matching the gold answer. It also provides the correct priority score of 0.059 (rounded from 0.0591). Furthermore, the agent correctly addresses the requirement for a second issue by stating there are no other actionable aspects with at least 30 negative reviews, which perfectly aligns with the gold answer's note that the second-highest topic (general satisfaction) is not actionable. The agent's response is relevant, accurate, and complete, meeting all the criteria of the gold standard.
+
+<insight_score>5</insight_score>",6.62,0.009662
+T8-H3,5,"The agent correctly identifies the two issues Kerbside should address first: the app/website and email support. It also provides the correct priority scores for both aspects (0.129 for app-website and 0.125 for email), matching the gold answer perfectly. The agent includes additional context, such as the number of negative mentions and the negative rate, which is helpful and does not contradict the gold answer. The ranking order is correct, and all key numbers are accurate. Therefore, the answer is relevant, accurate, and complete.
+
+<insight_score>5</insight_score>",4.95,0.007358
+T9-E1,2,"The agent fails to correctly answer the prompt. The gold answer identifies ""discounts and promotions"" as the primary driver for the higher complaint rate and the first area to improve, noting a 22.5 percentage point gap between the two banks. In contrast, the agent incorrectly identifies ""attitude-of-staff"" as the area to improve first. Furthermore, the agent does not explain *why* Halden Savings has a higher complaint rate than Kestrel Bank, only providing the overall complaint rates for both banks without comparing the specific drivers. Because the agent names the wrong problem and misses the core verdict, the answer is inaccurate. 
+
+<insight_score>2</insight_score>",6.85,0.010708
+T9-E2,3,"The agent correctly identifies ""App/Website"" as the top priority for improvement and provides the accurate negative sentiment rate of 74.0% for CompareHive. However, it fails to fully answer *why* CompareHive has a higher complaint rate than PricePilot. The gold answer explains this by comparing CompareHive's App/Website negative rate to PricePilot's (34.2%) and highlighting the 39.8 percentage point gap as the primary driver of the difference. 
+
+Because the agent misses these key comparative numbers that directly answer the first part of the prompt, it receives a lower score. The overall direction and recommended action are correct, but essential supporting numbers are missing.
+
+<insight_score>3</insight_score>",10.56,0.015774000000000003
+T9-H1,2,"The agent fails to identify the correct root cause and recommends the wrong area for improvement. The gold answer clearly states that staff attitude is the primary driver of the higher complaint rate due to a 23.8 percentage point gap in negative sentiment compared to Northerly. Instead, the agent suggests improving the app or website first based on absolute negative mentions, completely missing the comparative analysis required by the question. Because the agent names the wrong problem and delivers an incorrect verdict, it receives a low score despite sounding relevant and providing some numbers. 
+
+<insight_score>2</insight_score>",7.58,0.01021
+T9-H2,2,"The agent's answer sounds relevant as it addresses complaint rates and suggests an area for improvement, but it provides the completely wrong verdict. The gold answer explicitly states that the higher complaint rate is driven by ""speed"" and that Larkmead Market should improve this first, citing a 56.9% negative sentiment rate and a 33.2 percentage point gap compared to Oakpan Grocers. In contrast, the agent incorrectly identifies ""ease-of-use"" as the primary issue to improve and fails to mention ""speed"" or the comparative numbers for the specific driver. Because the agent names the wrong problem and misses the core insight required by the question, it receives a low score.
+
+<insight_score>2</insight_score>",7.38,0.010440000000000001
+T9-H3,2,"The gold answer explicitly states that the data does not explain the higher complaint rate and recommends collecting more feedback, as no specific actionable topic has a higher negative rate than Northeast Bank. The agent contradicts this by identifying 'ease-of-use' as the primary area to improve and providing specific metrics for it. By naming a specific problem when the gold answer states none can be identified from the data, the agent provides a wrong verdict and a contradicting claim. While the agent's answer sounds relevant and includes supporting numbers, its core conclusion is fundamentally inaccurate compared to the gold standard. 
+
+<insight_score>2</insight_score>",8.78,0.01103

@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grading agent answers for CX-Agent-Bench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#e9edf1;
+    --surface:#ffffff;
+    --ink:#16202b;
+    --muted:#5c6b7a;
+    --line:#d3dae1;
+    --accent:#1f4e79;
+    --gold-edge:#8a6d2f;
+    --agent-edge:#2f6b8a;
+    --warn:#8a3b2f;
+    --radius:4px;
+    --ui:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    --read:"Source Serif 4",Georgia,serif;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);color:var(--ink);font-family:var(--ui);
+    font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 20px 80px}
+  .screen{display:none}
+  .screen.active{display:block}
+
+  /* ---------- top bar ---------- */
+  .bar{
+    display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+    border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:24px;flex-wrap:wrap;
+  }
+  .bar h1{font-size:15px;font-weight:600;margin:0;letter-spacing:.01em}
+  /* landing-page title only — leave the in-task bar small */
+  #s-start .bar h1{font-family:var(--read);font-size:34px;font-weight:600;line-height:1.15;letter-spacing:-.01em;width:100%}
+  @media (max-width:760px){ #s-start .bar h1{font-size:26px} }
+  .progress{font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .progress b{color:var(--ink);font-weight:500}
+  .pbar{width:220px;height:4px;background:var(--line);border-radius:2px;margin-top:8px;overflow:hidden}
+  .pbar span{display:block;height:100%;background:var(--accent);width:0;transition:width .25s ease}
+
+  /* ---------- intro ---------- */
+  .lede{font-family:var(--read);font-size:20px;line-height:1.45;max-width:62ch;margin:0 0 20px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+  .card + .card{margin-top:16px}
+  label{display:block;font-size:13px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  input[type=text],textarea{
+    width:100%;font-family:var(--ui);font-size:16px;color:var(--ink);
+    background:#fbfcfd;border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;
+  }
+  textarea{resize:vertical;min-height:88px;line-height:1.5}
+  input[type=text]:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+  ul.rules{font-size:15px;padding-left:20px;margin:0}
+  ul.rules li{margin-bottom:8px}
+
+  button{font-family:var(--ui);cursor:pointer}
+  .primary{
+    background:var(--accent);color:#fff;border:1px solid var(--accent);
+    border-radius:var(--radius);padding:12px 28px;font-size:15px;font-weight:600;
+  }
+  .primary:disabled{background:#b9c4cd;border-color:#b9c4cd;cursor:not-allowed}
+  .primary:not(:disabled):hover{background:#163c5e}
+  .ghost{background:none;border:1px solid var(--line);border-radius:var(--radius);padding:9px 16px;font-size:14px;color:var(--ink)}
+  .ghost:hover{border-color:var(--muted)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* ---------- question ---------- */
+  .qblock{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--ink);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .qtext{font-family:var(--read);font-size:22px;line-height:1.35;margin:0}
+
+  /* ---------- answers ---------- */
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+  .ans{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
+  .ans.gold{border-top:3px solid var(--gold-edge)}
+  .ans.agent{border-top:3px solid var(--agent-edge)}
+  .ans h3{font-size:12px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;margin:0 0 10px;color:var(--muted)}
+  .ans .body{font-family:var(--read);font-size:17px;line-height:1.55;white-space:pre-wrap}
+
+  /* ---------- rubric ---------- */
+  details.rubric{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:20px}
+  details.rubric summary{padding:12px 20px;font-size:14px;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between}
+  details.rubric summary::-webkit-details-marker{display:none}
+  details.rubric summary::after{content:"show";font-weight:400;color:var(--muted);font-size:13px}
+  details.rubric[open] summary::after{content:"hide"}
+  .rub{border-top:1px solid var(--line);padding:4px 20px 16px}
+  .rub table{width:100%;border-collapse:collapse;font-size:14.5px}
+  .rub td{padding:7px 0;vertical-align:top;border-bottom:1px solid #eef1f4}
+  .rub td:first-child{width:56px;font-family:var(--mono);font-weight:500}
+  .rub th{
+    text-align:left;padding:0 0 8px;font-family:var(--mono);font-size:12px;font-weight:500;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);
+  }
+  .rub th:first-child{width:56px}
+  .caps{margin-top:12px;font-size:14px;color:var(--warn)}
+  .caps div{margin-top:4px}
+
+  /* ---------- scoring ---------- */
+  .scores{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+  .sc{
+    flex:1;min-width:76px;background:#fbfcfd;border:1px solid var(--line);border-radius:var(--radius);
+    padding:12px 6px;font-family:var(--mono);font-size:20px;font-weight:500;color:var(--ink);
+  }
+  .sc small{display:block;font-family:var(--ui);font-size:11px;font-weight:400;color:var(--muted);margin-top:4px;letter-spacing:.02em}
+  .sc:hover{border-color:var(--muted)}
+  .sc[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+  .sc[aria-pressed=true] small{color:#c6d0d9}
+
+  .req{font-size:11px;font-weight:500;letter-spacing:.04em;color:var(--warn);border:1px solid var(--warn);border-radius:2px;padding:1px 6px;margin-left:6px;text-transform:none}
+  .opt{font-size:11px;font-weight:400;letter-spacing:.04em;color:var(--muted);border:1px solid var(--line);border-radius:2px;padding:1px 6px;margin-left:6px;text-transform:none}
+  .missing{border-color:var(--warn) !important;background:#fdf7f6 !important}
+  .scores.missing{border:none;background:none !important}
+  .scores.missing .sc{border-color:var(--warn)}
+  .foot{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:20px;flex-wrap:wrap}
+  .hint{font-size:13.5px;color:var(--muted)}
+  .hint.block{color:var(--warn)}
+  .status{font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+  /* ---------- landing-page guidelines ---------- */
+  .sec{margin-top:28px}
+  .sec > h2{
+    font-family:var(--mono);font-size:16px;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--ink);font-weight:500;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid var(--line);
+  }
+  .card p{margin:0 0 12px}
+  .card p:last-child{margin-bottom:0}
+  .card h4{font-size:15px;margin:0 0 8px}
+  .checklist{list-style:none;padding:0;margin:0}
+  .checklist li{margin-bottom:12px;padding-left:0}
+  .checklist li:last-child{margin-bottom:0}
+  .checklist b{font-family:var(--read);font-size:17px}
+  .ex{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px}
+  .ex .exhead{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .ex .exq{font-family:var(--read);font-size:18px;line-height:1.35;margin:0 0 14px}
+  .expair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .expair > div{border-top:2px solid var(--line);padding-top:10px}
+  .expair > div:first-child{border-top-color:var(--gold-edge)}
+  .expair > div:last-child{border-top-color:var(--agent-edge)}
+  .expair h5{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;font-weight:500}
+  .expair .body{font-family:var(--read);font-size:15.5px;line-height:1.5;white-space:pre-wrap}
+  .verdict{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:14.5px}
+  .verdict .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px}
+  .verdict .num{display:inline-block;font-family:var(--mono);font-size:17px;font-weight:500;background:var(--ink);color:#fff;border-radius:2px;padding:2px 11px}
+  .verdict .cmt{margin-top:12px}
+  .startbox{position:sticky;bottom:0;background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:var(--radius);padding:22px;margin-top:28px;box-shadow:0 -8px 24px rgba(22,32,43,.06)}
+  @media (max-width:760px){ .expair{grid-template-columns:1fr} }
+
+  .done h2{font-family:var(--read);font-size:32px;margin:0 0 8px}
+  .stat{font-family:var(--mono);font-size:14px;color:var(--muted)}
+
+  @media (max-width:760px){
+    .pair{grid-template-columns:1fr}
+    .qtext{font-size:19px}
+    .wrap{padding:16px 14px 60px}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .screen.active{animation:fade .18s ease-out}
+    @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ============ 1. START ============ -->
+<section id="s-start" class="screen active">
+  <div class="bar"><h1>Annotation guidelines: grading agent answers on customer feedback analysis tasks</h1></div>
+
+  <p class="lede">Please read the following guidelines carefully.</p>
+
+  <div class="card">
+    <p>An AI agent has been asked 50 questions about customer feedback and has written answers. For each task, you will see a <strong>question</strong>, an <strong>agent's answer</strong> and a <strong>gold answer</strong> — the answer we're treating as the correct one. Please decide how close the agent's answer is to the gold answer by assigning a score from 0 to 5, and leave some comments on why you gave that score.</p>
+    <p>You will not see the original customer data — you don't need it because you're not working out the right answer yourself. You're only comparing the agent's answer to the gold answer provided.</p>
+  </div>
+
+  <div class="sec">
+    <h2>What every gold answer contains</h2>
+    <div class="card">
+      <p>Every gold answer has the same structure below. Use this as your checklist when comparing:</p>
+      <ul class="checklist">
+        <li><b>The verdict</b> — the direct answer to the question (yes or no, a top-3 list, the single biggest problem etc.)</li>
+        <li><b>The numbers</b> — the supporting figures (percentages, counts).</li>
+        <li><b>The catch</b> — some questions specifically ask for a key point. For example, a gold answer might say whether a difference is big enough to be meaningful ("statistically significant"). Another gold answer might include a warning that one number is based on too few reviews to trust ("sample size is too small"). Not every question has a catch.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>Before you start: flag anything unclear (optional)</h2>
+    <div class="card">
+      <p>The gold answers have already been verified, but if a question or gold answer still looks unclear or wrong to you, say why in the comment box. If nothing seems off, just leave it blank and move on to grading.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>Grading rules</h2>
+    <div class="card">
+      <p>Use the following rules when grading the agent's answer (score 0 to 5):</p>
+      <ul class="rules">
+        <li><strong>Always leave a comment.</strong> For every score, write 1–2 sentences saying what decided it — see the examples below.</li>
+        <li><strong>Getting the direction right matters most.</strong> Saying yes when the answer is no, naming the wrong problem, or putting a ranking in the wrong order is a big mistake, even if the answer reads well.</li>
+        <li>If the agent doesn't include the <strong>"catch"</strong> when the question asks for it, it <strong>can't score higher than 3</strong>.</li>
+        <li>If the agent <strong>doesn't answer the question</strong>, it <strong>can't score higher than 2</strong>.</li>
+        <li><strong>Complete this yourself.</strong> Please don't discuss the tasks with other people or use any AI tools.</li>
+        <li><strong>Grade each task on its own.</strong> Don't skip ahead or go back to compare tasks.</li>
+        <li><strong>You don't have to finish in one go.</strong> Your progress is saved after every task — close the tab whenever you like and reopen the same link to carry on. Try to finish within a week.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>The rubric</h2>
+    <div class="card" style="padding:8px 20px 12px">
+      <div class="rub" style="border-top:none;padding:0">
+        <table>
+          <tr><th>Score</th><th>What it means</th></tr>
+          <tr><td>5</td><td>Relevant, accurate, and complete. Right verdict, all key numbers right, the "catch" and all requested parts included, nothing that contradicts the gold answer.</td></tr>
+          <tr><td>4</td><td>Relevant and mostly accurate. One non-essential part is wrong or missing, but the recommended actions are correct.</td></tr>
+          <tr><td>3</td><td>Relevant and correct direction, but a key number is wrong or missing, or the required "catch" is left out.</td></tr>
+          <tr><td>2</td><td>The answer sounds relevant but is inaccurate. Wrong verdict, no supporting numbers or a made-up/contradicting claim.</td></tr>
+          <tr><td>1</td><td>Barely relevant. The main answer is wrong or so vague that there is almost nothing you can check.</td></tr>
+          <tr><td>0</td><td>Doesn't answer the question asked. Wrong, contradicts itself, off-topic, a refusal, or blank.</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>Example scores and comments</h2>
+
+    <div class="ex">
+      <div class="exhead">Example A · Task (L5)</div>
+      <p class="exq">"Is the difference in app/website complaint rates between Banking and Travel Booking statistically significant?"</p>
+      <div class="expair">
+        <div><h5>Gold answer</h5><div class="body">Yes, the difference is statistically significant (p&lt;0.001):
+ • Banking app/website: 58.5% negative
+ • Travel Booking: 26% negative</div></div>
+        <div><h5>Agent answer</h5><div class="body">Yes, the gap is real: Banking's app/website feedback is 58.5% negative against Travel Booking's 26%, and the difference is statistically significant (p&lt;0.001).</div></div>
+      </div>
+      <div class="verdict"><span class="lbl">Suggested score</span><span class="num">5</span><div class="cmt"><span class="lbl">Example comment</span>Relevant, accurate (both rates and direction right), and complete (states significance).</div></div>
+    </div>
+
+    <div class="ex">
+      <div class="exhead">Example B · Task (L3)</div>
+      <p class="exq">"What are the top 3 topics Travel Booking customers complain about most?"</p>
+      <div class="expair">
+        <div><h5>Gold answer</h5><div class="body">The top 3 topics in Travel Booking by complaint volume are:
+ • Ease of use — 89
+ • App/website — 67
+ • Speed — 52</div></div>
+        <div><h5>Agent answer</h5><div class="body">The top three complaints in Travel Booking are ease of use (89), then app/website (67), then speed.</div></div>
+      </div>
+      <div class="verdict"><span class="lbl">Suggested score</span><span class="num">4</span><div class="cmt"><span class="lbl">Example comment</span>Relevant and accurate (correct topics in the correct order). Missing count for speed, but that doesn't change the ranking.</div></div>
+    </div>
+
+    <div class="ex">
+      <div class="exhead">Example C · Task (L8)</div>
+      <p class="exq">"Why does RideCoA get more complaints than RideCoC, and what's driving the gap?"</p>
+      <div class="expair">
+        <div><h5>Gold answer</h5><div class="body">Pricing is driving the gap. Among all reviews about price,
+ • RideCoA: 74% negative
+ • RideCoC: 52% negative
+ • The 22-point difference is statistically significant (p=0.03)
+
+Recommendation: RideCoA should reassess their pricing strategy.</div></div>
+        <div><h5>Agent answer</h5><div class="body">The gap comes down to pricing — RideCoA's pricing feedback runs 74% negative versus RideCoC's 52%. RideCoA should be clearer about how it prices.</div></div>
+      </div>
+      <div class="verdict"><span class="lbl">Suggested score</span><span class="num">3</span><div class="cmt"><span class="lbl">Example comment</span>Relevant, with the right driver, figures and recommendation. But it doesn't state statistical significance.</div></div>
+    </div>
+
+    <div class="ex">
+      <div class="exhead">Example D · Task (L7)</div>
+      <p class="exq">"Which issue should TravelCoB fix first, weighing frequency and severity?"</p>
+      <div class="expair">
+        <div><h5>Gold answer</h5><div class="body">TravelCoB should fix the app/website first as its volume (48) and rate (61%) of negative reviews are both high. The second priority should be speed, which is 68% negative but has much fewer reviews (12).</div></div>
+        <div><h5>Agent answer</h5><div class="body">Going by how negative each issue is, speed tops the list at 68% — so that's where TravelCoB should start.</div></div>
+      </div>
+      <div class="verdict"><span class="lbl">Suggested score</span><span class="num">2</span><div class="cmt"><span class="lbl">Example comment</span>Sounds relevant and cites 1 correct figure, but the verdict is wrong. Doesn't take into account the number of reviews.</div></div>
+    </div>
+
+    <div class="ex">
+      <div class="exhead">Example E · Task (L6)</div>
+      <p class="exq">"What is the single biggest driver of customer dissatisfaction at BankA?"</p>
+      <div class="expair">
+        <div><h5>Gold answer</h5><div class="body">Ease of use is BankA's biggest driver of dissatisfaction: 72% of its ease-of-use reviews are negative (n=43).</div></div>
+        <div><h5>Agent answer</h5><div class="body">Looking at BankA's dissatisfied customers, the frustration seems to come from a few different places rather than one standout issue. No single topic dominates, so the strongest move would be lifting the overall experience.</div></div>
+      </div>
+      <div class="verdict"><span class="lbl">Suggested score</span><span class="num">1</span><div class="cmt"><span class="lbl">Example comment</span>The answer is about BankA and dissatisfaction, but doesn't answer the question. No drivers, aspects or numbers. Too vague.</div></div>
+    </div>
+
+    <div class="ex">
+      <div class="exhead">Example F · Task (L6)</div>
+      <p class="exq">"What is the single biggest driver of customer dissatisfaction at BankA?"</p>
+      <div class="expair">
+        <div><h5>Gold answer</h5><div class="body">Ease of use is BankA's biggest driver of dissatisfaction: 72% of its ease-of-use reviews are negative (n=43).</div></div>
+        <div><h5>Agent answer</h5><div class="body">BankA is performing well overall, with 68% of its reviews positive — noticeably ahead of the Banking average. Its strongest area is staff support, where customers frequently praise how helpful the team is.</div></div>
+      </div>
+      <div class="verdict"><span class="lbl">Suggested score</span><span class="num">0</span><div class="cmt"><span class="lbl">Example comment</span>Confident and specific, but answers a completely different question.</div></div>
+    </div>
+  </div>
+
+  <div class="startbox">
+    <label for="tagger">Your name</label>
+    <input type="text" id="tagger" autocomplete="name" placeholder="e.g. Jordan Smith">
+    <div class="foot">
+      <span class="hint" id="startHint"></span>
+      <button class="primary" id="startBtn" disabled>Start grading</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. TASK ============ -->
+<section id="s-task" class="screen">
+  <div class="bar">
+    <div>
+      <h1>Grading agent answers</h1>
+      <div class="pbar"><span id="pfill"></span></div>
+    </div>
+    <div class="progress">Task <b id="pNow">1</b> of <b id="pTot">50</b> &nbsp;·&nbsp; <span id="clock">00:00</span></div>
+  </div>
+
+  <div class="qblock">
+    <div class="eyebrow" id="taskId">—</div>
+    <p class="qtext" id="question"></p>
+  </div>
+
+  <div class="pair">
+    <div class="ans gold"><h3>Gold answer</h3><div class="body" id="gold"></div></div>
+    <div class="ans agent"><h3>Agent answer</h3><div class="body" id="agent"></div></div>
+  </div>
+
+  <details class="rubric">
+    <summary>Rubric</summary>
+    <div class="rub">
+      <table>
+        <tr><th>Score</th><th>What it means</th></tr>
+        <tr><td>5</td><td>Relevant, accurate, and complete. Right verdict, all key numbers right, the catch and all requested parts included, nothing that contradicts the gold answer.</td></tr>
+        <tr><td>4</td><td>Relevant and mostly accurate. One non-essential part is wrong or missing, but the recommended actions are correct.</td></tr>
+        <tr><td>3</td><td>Relevant and correct direction, but a key number is wrong or missing, or the required catch is left out.</td></tr>
+        <tr><td>2</td><td>Sounds relevant but is inaccurate. Wrong verdict, no supporting numbers, or a made-up / contradicting claim.</td></tr>
+        <tr><td>1</td><td>Barely relevant. The main answer is wrong or so vague there is almost nothing to check.</td></tr>
+        <tr><td>0</td><td>Doesn't answer the question asked. Wrong, contradicts itself, off-topic, a refusal, or blank.</td></tr>
+      </table>
+      <div class="caps">
+        <div>If the question asks for a catch and the agent leaves it out, it can't score above 3.</div>
+        <div>If the agent doesn't answer the question, it can't score above 2.</div>
+      </div>
+    </div>
+  </details>
+
+  <div class="card">
+    <label>Score <span class="req">required</span></label>
+    <div class="scores" id="scores"></div>
+    <div class="hint" style="margin-bottom:18px">Pick the row that matches, not an average impression.</div>
+
+    <label for="comments">Why this score <span class="req">required</span></label>
+    <textarea id="comments" placeholder="1–2 sentences on what decided it."></textarea>
+
+    <div style="margin-top:18px">
+      <label for="flag">Anything unclear or wrong with this question or gold answer? <span class="opt">optional</span></label>
+      <textarea id="flag" style="min-height:60px" placeholder="Leave blank if nothing seems off."></textarea>
+    </div>
+
+    <div class="foot">
+      <span class="hint" id="taskHint">Add a score and a comment to continue.</span>
+      <button class="primary" id="nextBtn" disabled>Save and next</button>
+    </div>
+  </div>
+  <div class="foot" style="margin-top:10px">
+    <span class="status" id="netStatus"></span>
+    <span class="hint">Progress is saved after every task — you can close this tab and pick up where you left off.</span>
+  </div>
+</section>
+
+<!-- ============ 3. DONE ============ -->
+<section id="s-done" class="screen done">
+  <div class="bar"><h1>Grading agent answers</h1></div>
+  <div class="card">
+    <h2>All 10 graded. Thank you.</h2>
+    <p class="stat" id="summary"></p>
+    <p class="hint" id="doneMsg">Your answers have been sent. Nothing else to do.</p>
+    <div class="foot">
+      <span class="hint">Keep a copy for your records if you like.</span>
+      <button class="ghost" id="csvBtn">Download my answers (CSV)</button>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+/* ======================================================================
+   CONFIG — paste your Apps Script /exec URL between the quotes.
+   ====================================================================== */
+const ENDPOINT = "https://script.google.com/macros/s/AKfycby5xOMq1aVhicjPaD7Q7t-L7nNsmATt7OBu7v7HgHjqSYbyaqGADEWcHUqodWVwk-3Nfg/exec";
+
+/* ---------------- tasks (embedded) ---------------- */
+const TASKS = [
+  {
+    "task_id": "T1-E1",
+    "question": "What proportion of Banking reviews that mention the app or website are negative?",
+    "gold_answer": "18.7% of Banking reviews about the app or website are negative (80 out of 427).",
+    "agent_answer": "The proportion of Banking reviews that mention the app or website that are negative is 18.7% (80 out of 427 mentions)."
+  },
+  {
+    "task_id": "T1-E2",
+    "question": "What proportion of Fashion reviews that mention ease of use are positive?",
+    "gold_answer": "86.8% of Fashion reviews about ease of use are positive (402 out of 463).",
+    "agent_answer": "No answer. The aspect 'ease of use' does not exist in the dataset. Therefore, I cannot filter the reviews to answer the question."
+  },
+  {
+    "task_id": "T1-H1",
+    "question": "What proportion of Fashion reviews that mention speed are negative?",
+    "gold_answer": "21.3% of Fashion reviews about speed are negative (117 out of 549).",
+    "agent_answer": "21.3% of Fashion reviews that mention speed are negative (117 out of 549)."
+  },
+  {
+    "task_id": "T1-H2",
+    "question": "What proportion of Price Comparison reviews that mention staff attitude are negative?",
+    "gold_answer": "10.9% of Price Comparison reviews about staff attitude are negative (43 out of 396).",
+    "agent_answer": "No answer. The aspect 'staff attitude' does not exist in the dataset for Price Comparison reviews."
+  },
+  {
+    "task_id": "T1-H3",
+    "question": "What proportion of Ride Hailing reviews that mention discounts and promotions are negative?",
+    "gold_answer": "No answer. Ride Hailing has only 3 reviews mentioning discounts and\npromotions (minimum 30), so no proportion can be reported reliably.",
+    "agent_answer": "No answer. The aspect 'discounts-promotions' in the 'Ride Hailing' industry has fewer than 30 mentions, so its negative proportion cannot be reliably reported."
+  },
+  {
+    "task_id": "T10-E1",
+    "question": "Write a CX report for Trippa. Cover overall sentiment, the top 3 issues ranked by negative sentiment rate, and how the top issue compares with the industry average using a statistical significance test. Also give me an improvement roadmap.",
+    "gold_answer": "CX report for Trippa\n\n  Overview: Trippa received 674 labelled mentions - 56.2% positive, 42.3% negative, 1.5% neutral.\n\n  Top 3 issues:\n    1. account access (87.5% negative, 40 mentions) - joint first\n    1. email support (87.5% negative, 40 mentions) - joint first\n    3. phone support (65.0% negative, 40 mentions)\n\n  Industry comparison: Trippa performs better than the Travel Booking average on account access (87.5% vs 93.1%) and slightly worse on email support\n    (87.5% vs 86.2%). Tested against the rest of the industry, neither difference is statistically significant (p = 0.104 for account access, p =\n    0.791 for email support), so Trippa's performance is broadly similar to its industry peers.\n\n  Roadmap:\n    1. Improve account access and email support together - tied on both mentions and negative rate\n    2. Improve phone support (65.0% negative across 40 mentions)",
+    "agent_answer": "Trippa's overall sentiment is 42.3% negative (285 mentions), 1.5% neutral (10 mentions), and 56.2% positive (379 mentions).\n\nThe top 3 issues for Trippa, ranked by negative sentiment rate, are:\n1.  Account access: 87.5% negative (35 mentions)\n2.  Email: 87.5% negative (35 mentions)\n3.  Phone: 65.0% negative (26 mentions)\n\nComparing 'account-access' for Trippa (87.5% negative, 35 mentions) with the industry average (95.0% negative, 114 mentions) shows a difference of -7.5 percentage points. However, this difference is not statistically significant (p=0.105), and the test is not reliable due to low cell counts.\n\nComparing 'email' for Trippa (87.5% negative, 35 mentions) with the industry average (85.8% negative, 103 mentions) shows a difference of 1.7 percentage points. This difference is not statistically significant (p=0.791), and the test is not reliable due to low cell counts.\n\nImprovement Roadmap:\nTrippa should focus on improving the customer experience related to 'account-access' and 'email', as these are the areas with the highest negative sentiment rates. Although statistical significance could not be reliably established against the industry average due to data volume, these aspects represent significant pain points for Trippa's customers. Addressing these issues could lead to a substantial improvement in overall customer satisfaction."
+  },
+  {
+    "task_id": "T10-E2",
+    "question": "Write a CX report for Kestrel Bank. Cover overall sentiment, the top 3 issues ranked by negative sentiment rate, and how the top issue compares with the industry average using a statistical significance test. Also give me an improvement roadmap.",
+    "gold_answer": "CX report for Kestrel Bank\n\n  Overview: Kestrel Bank received 709 labelled mentions - 51.5% positive, 38.9% negative, 9.6% neutral.\n\n  Top 3 issues:\n    1. staff attitude (95.0% negative, 40 mentions)\n    2. email support (82.5% negative, 40 mentions) - joint second\n    2. phone support (82.5% negative, 40 mentions) - joint second\n\n  Industry comparison: Kestrel Bank performs worse than the Banking average on staff attitude (95.0% vs 90.0%). Tested against the rest of the\n    industry, the difference is not statistically significant (p = 0.224), so Kestrel Bank's performance is broadly similar to its industry peers.\n\n  Roadmap:\n    1. Improve staff attitude (95.0% negative across 40 mentions)\n    2. Improve email support and phone support together - tied on both mentions and negative rate",
+    "agent_answer": "Kestrel Bank's overall sentiment is 38.9% negative (276 mentions), 9.6% neutral (68 mentions), and 51.5% positive (365 mentions) out of 709 reviews. \n\nThe top 3 issues for Kestrel Bank, ranked by negative sentiment rate, are:\n1. Staff attitude: 95.0% negative (38 mentions) out of 40.\n2. Email: 82.5% negative (33 mentions) out of 40.\n3. Phone: 82.5% negative (33 mentions) out of 40.\n\nComparing 'staff attitude' for Kestrel Bank (95.0% negative, 38 mentions) with the industry average (88.3% negative, 106 mentions), Kestrel Bank has a 6.7 percentage point higher negative rate. However, the statistical significance test for this difference is not reliable due to insufficient data in the comparison groups.\n\nImprovement Roadmap:\nKestrel Bank should prioritize addressing the following areas to improve customer experience:\n1. **Staff Attitude:** Invest in training and development programs to enhance staff interactions and customer service skills.\n2. **Email Communication:** Review and optimize email response times, clarity, and effectiveness to reduce negative sentiment.\n3. **Phone Communication:** Improve phone support services, including wait times, call resolution, and agent helpfulness."
+  },
+  {
+    "task_id": "T10-H1",
+    "question": "Write a CX report for Vella & Co. Cover overall sentiment, the top 3 issues ranked by negative sentiment rate, and how the top issue compares with the industry average using a statistical significance test. Also give me an improvement roadmap.",
+    "gold_answer": "CX report for Vella & Co\n\n  Overview: Vella & Co received 777 labelled mentions - 74.5% positive, 24.3% negative, 1.2% neutral.\n\n  Top 3 issues:\n    1. phone support (80.0% negative, 40 mentions)\n    2. staff attitude (48.3% negative, 58 mentions)\n    3. price and value for money (41.7% negative, 36 mentions)\n\n  Industry comparison: Vella & Co performs worse than the Fashion average on phone support (80.0% vs 74.5%). Tested against the rest of the industry,\n    the difference is not statistically significant (p = 0.290), so Vella & Co's performance is broadly similar to its industry peers.\n\n  Roadmap:\n    1. Improve phone support (80.0% negative across 40 mentions)\n    2. Improve staff attitude (48.3% negative across 58 mentions)\n    3. Improve price and value for money (41.7% negative across 36 mentions)",
+    "agent_answer": "Vella & Co. CX Report\n\n**Overall Sentiment:**\nVella & Co. has an overall negative sentiment rate of 24.3% (189 mentions), a neutral rate of 1.2% (9 mentions), and a positive rate of 74.5% (579 mentions) out of 777 total reviews.\n\n**Top 3 Issues by Negative Sentiment Rate:**\nThe top three issues for Vella & Co., ranked by negative sentiment rate, are:\n1.  **Phone:** 80.0% negative (32 negative mentions out of 40 total mentions).\n2.  **Attitude of staff:** 48.3% negative (28 negative mentions out of 58 total mentions).\n3.  **Price-value for money:** 41.7% negative (15 negative mentions out of 36 total mentions).\n\n**Comparison of 'Phone' Issue with Industry Average:**\nVella & Co.'s negative sentiment rate for 'phone' (80.0%) is significantly higher than the industry average (excluding Vella & Co.) of 55.5%. This represents a difference of 24.5 percentage points. The z-test indicates this difference is statistically significant (p=0.0034). However, the reliability of this test is limited as one of the cells (non-negative mentions for Vella & Co.) had fewer than 10 observations.\n\n**Improvement Roadmap:**\nBased on these findings, Vella & Co. should prioritize improvements in the following areas:\n1.  **Phone Service:** Address the high negative sentiment associated with phone interactions. This could involve investigating call wait times, call resolution rates, and the quality of support provided over the phone.\n2.  **Staff Attitude:** Focus on improving customer perception of staff attitude. Training programs on customer service, empathy, and communication could be beneficial.\n3.  **Price-Value for Money:** Review pricing strategies and ensure that customers perceive good value for the services or products offered. This might involve re-evaluating pricing models or enhancing the perceived benefits of their offerings."
+  },
+  {
+    "task_id": "T10-H2",
+    "question": "Write a CX report for Freshbury. Cover overall sentiment, the top 3 issues ranked by negative sentiment rate, and how the top issue compares with the industry average using a statistical significance test. Also give me an improvement roadmap.",
+    "gold_answer": "CX report for Freshbury\n\n  Overview: Freshbury received 677 labelled mentions - 59.2% positive, 38.8% negative, 1.9% neutral.\n\n  Top 3 issues:\n    1. the app or website (49.6% negative, 262 mentions)\n    2. speed (38.9% negative, 54 mentions)\n    3. ease of use (30.2% negative, 189 mentions)\n\n  Industry comparison: Freshbury performs worse than the Groceries average on the app or website (49.6% vs 48.1%). Tested against the rest of the\n    industry, the difference is not statistically significant (p = 0.452), so Freshbury's performance is broadly similar to its industry peers.\n\n  Roadmap:\n    1. Improve the app or website (49.6% negative across 262 mentions)\n    2. Improve speed (38.9% negative across 54 mentions)\n    3. Improve ease of use (30.2% negative across 189 mentions)",
+    "agent_answer": "Freshbury's overall sentiment is 38.9% negative (263 mentions), 1.9% neutral (13 mentions), and 59.2% positive (401 mentions) out of 677 reviews. \n\nThe top 3 issues for Freshbury, ranked by negative sentiment rate, are:\n1. App or website: 49.6% negative (130 mentions)\n2. Speed: 38.9% negative (21 mentions)\n3. Ease of use: 30.2% negative (57 mentions)\n\nComparing Freshbury's 'app or website' issue with the industry average (excluding Freshbury), Freshbury has a significantly higher negative sentiment rate. Freshbury's 'app or website' negative rate is 49.6% (130 mentions), while the industry average for 'app or website' is 32.5% (973 mentions). This represents a statistically significant difference of 17.1 percentage points.\n\nImprovement Roadmap:\n1. Prioritize improving the 'app or website' experience: This is Freshbury's most significant pain point, with nearly half of all mentions being negative and significantly worse than the industry average. Focus on user interface, functionality, and stability.\n2. Address 'speed' concerns: With a 38.9% negative rate, speed is another critical area for improvement. Investigate and optimize processes or services that customers perceive as slow.\n3. Enhance 'ease of use': A 30.2% negative rate for ease of use indicates that customers find certain aspects of Freshbury's services or products difficult to use. Simplify processes and provide clearer instructions or support."
+  },
+  {
+    "task_id": "T10-H3",
+    "question": "Write a CX report for Lumora. Cover overall sentiment, the top 3 issues ranked by negative sentiment rate, and how the top issue compares with the industry average using a statistical significance test. Also give me an improvement roadmap.",
+    "gold_answer": "No answer. A full CX report cannot be produced because there is insufficient data to rank the top 3 issues and create a roadmap. Only one\ntopic (account access) has at least 30 reviews. The negative sentiment rate is 35%, which is slightly lower than the 36.7% for the rest of the\nindustry, and the difference is not statistically significant (p=0.8653).",
+    "agent_answer": "Lumora's overall sentiment is 32.1% negative (18 out of 56 mentions). The top issue for Lumora, ranked by negative sentiment rate, is account-access with a negative rate of 35.0% (14 negative mentions out of 40 total mentions). Other potential issues, app-website (12 mentions) and discounts-promotions (4 mentions), are below the 30-mention reliability threshold and cannot be reported. Comparing Lumora's 'account-access' issue with the rest of the Streaming industry, Lumora has a negative rate of 35.0% (14 out of 40 mentions), while the industry average (excluding Lumora) is 36.7% negative (18 out of 49 mentions). The difference of -1.7 percentage points is not statistically significant (z = -0.17, p = 0.8653). Improvement Roadmap: Focus on improving the 'account-access' experience for customers. While the negative rate is not significantly different from the industry average, it is the most frequently mentioned negative aspect for Lumora that can be reliably reported. Investigate the specific pain points within 'account-access' to identify areas for improvement."
+  },
+  {
+    "task_id": "T2-E1",
+    "question": "What is the sentiment breakdown across all Ride Hailing reviews, as percentages?",
+    "gold_answer": "Ride Hailing sentiment is 22.1% positive, 72.8% negative and 5.2% neutral across 1532 mentions.",
+    "agent_answer": "Across all Ride Hailing reviews (1532 mentions), 72.8% are negative (1115 mentions), 5.2% are neutral (79 mentions), and 22.1% are positive (338 mentions)."
+  },
+  {
+    "task_id": "T2-E2",
+    "question": "What is the sentiment breakdown across all Marbrook reviews, as percentages?",
+    "gold_answer": "Marbrook sentiment is 65.6% positive, 32.8% negative and 1.6% neutral across 1044 mentions.",
+    "agent_answer": "Marbrook reviews are 32.8% negative (342 mentions), 1.6% neutral (17 mentions), and 65.6% positive (685 mentions), out of a total of 1044 reviews."
+  },
+  {
+    "task_id": "T2-H1",
+    "question": "What is the sentiment breakdown across all Vanter Financial reviews, as percentages?",
+    "gold_answer": "Vanter Financial sentiment is 60.2% positive, 28.3% negative and 11.4% neutral across 420 mentions.",
+    "agent_answer": "The sentiment breakdown for Vanter Financial reviews is: 28.3% negative (119 mentions), 11.4% neutral (48 mentions), and 60.2% positive (253 mentions)."
+  },
+  {
+    "task_id": "T2-H2",
+    "question": "What is the sentiment breakdown across all PricePilot reviews, as percentages?",
+    "gold_answer": "PricePilot sentiment is 84.1% positive, 15.5% negative and 0.4% neutral across 805 mentions.",
+    "agent_answer": "Across all 805 PricePilot reviews, the sentiment breakdown is: 15.5% negative, 0.4% neutral, and 84.1% positive."
+  },
+  {
+    "task_id": "T2-H3",
+    "question": "What is the sentiment breakdown across all Sable Row reviews, as percentages?",
+    "gold_answer": "Sable Row sentiment is 69.5% positive, 30.2% negative and 0.3% neutral across 925 mentions.",
+    "agent_answer": "Sable Row reviews have the following sentiment breakdown: 30.2% negative (279 reviews), 0.3% neutral (3 reviews), and 69.5% positive (643 reviews)."
+  },
+  {
+    "task_id": "T3-E1",
+    "question": "What are the top 3 topics with the most number of complaints in Travel Booking?",
+    "gold_answer": "The top 3 topics with the most complaints in Travel Booking are: the app or website (215), account access (149) and email support (138).",
+    "agent_answer": "The top 3 topics with the most complaints in Travel Booking are: app-website (215 mentions), account-access (149 mentions), and email (138 mentions)."
+  },
+  {
+    "task_id": "T3-E2",
+    "question": "What are the top 3 topics with the most number of complaints in Groceries?",
+    "gold_answer": "The top 3 topics with the most complaints in Groceries are: the app or website (383), ease of use (215) and email support (100).",
+    "agent_answer": "The top 3 topics with the most complaints in Groceries are app-website (383 mentions), ease-of-use (215 mentions), and email (100 mentions)."
+  },
+  {
+    "task_id": "T3-H1",
+    "question": "What are the top 3 topics with the most number of complaints in Fashion?",
+    "gold_answer": "The top 3 topics with the most complaints in Fashion are: the app or website (241), general satisfaction (160) and speed (117).",
+    "agent_answer": "The top 3 topics with the most complaints in Fashion are app-website (241 mentions), general-satisfaction (160 mentions) and speed (117 mentions)."
+  },
+  {
+    "task_id": "T3-H2",
+    "question": "What are the top 3 topics with the most number of complaints in Price Comparison?",
+    "gold_answer": "The top 3 topics with the most complaints in Price Comparison are: the app or website (148), price and value for money (65) and general satisfaction (48).",
+    "agent_answer": "The top 3 topics with the most complaints in Price Comparison are app-website (148 mentions), price-value-for-money (65 mentions), and general-satisfaction (48 mentions)."
+  },
+  {
+    "task_id": "T3-H3",
+    "question": "What are the top 3 topics with the most number of complaints in Consulting?",
+    "gold_answer": "No answer. Consulting reviews in the dataset only cover one\ntopic (account access), so a top 3 ranking of complaint topics does not exist.",
+    "agent_answer": "No answer. There is only one topic with at least 30 negative mentions in Consulting: account-access (52 mentions). To report reliably, a slice needs at least 30 mentions."
+  },
+  {
+    "task_id": "T4-E1",
+    "question": "Looking only at reviews about price and value for money, is the negative sentiment rate higher in Banking or Ride Hailing?",
+    "gold_answer": "Ride Hailing has the higher negative sentiment rate (75.8%) for price and value for money, compared to 20.0% for Banking.",
+    "agent_answer": "For reviews about price and value for money, the negative sentiment rate is significantly higher in Ride Hailing (75.8%, 91 mentions) than in Banking (20.0%, 32 mentions). The difference is 55.8 percentage points."
+  },
+  {
+    "task_id": "T4-E2",
+    "question": "Looking only at reviews about the app or website, is the negative sentiment rate higher in Fashion or Travel Booking?",
+    "gold_answer": "Travel Booking has the higher negative sentiment rate (44.1%) for the app or website, compared to 27.9% for Fashion.",
+    "agent_answer": "The negative sentiment rate for 'app-website' reviews is higher in Travel Booking (44.1%, 215 out of 488 reviews) than in Fashion (27.9%, 220 out of 788 reviews). The difference of 16.1 percentage points is statistically significant."
+  },
+  {
+    "task_id": "T4-H1",
+    "question": "Looking only at reviews about ease of use, is the negative sentiment rate higher in Groceries or Trading?",
+    "gold_answer": "Groceries has the higher negative sentiment rate (42.4%) for ease of use, compared to 10.9% for Trading.",
+    "agent_answer": "No answer. The aspect 'ease of use' is not present in the dataset. Please provide a valid aspect from the dataset."
+  },
+  {
+    "task_id": "T4-H2",
+    "question": "Looking only at reviews about ease of use, is the negative sentiment rate higher in Banking or Consulting?",
+    "gold_answer": "No answer. Consulting has no reviews mentioning ease of use, so the two industries cannot be compared on this topic.",
+    "agent_answer": "No answer. There are no reviews about 'ease-of-use' in the Consulting industry, so a comparison of negative sentiment rates cannot be made."
+  },
+  {
+    "task_id": "T4-H3",
+    "question": "Looking only at reviews about price and value for money, is the negative sentiment rate higher in Consulting or Streaming?",
+    "gold_answer": "No answer. Neither Consulting nor Streaming has any reviews mentioning price and\nvalue for money, so the two industries cannot be compared on this topic.",
+    "agent_answer": "No answer. There are no reviews tagged with 'price-value-for-money' in either the Consulting or Streaming industries, so a comparison cannot be made."
+  },
+  {
+    "task_id": "T5-E1",
+    "question": "Do CompareHive and Tallywise have significantly different negative sentiment rates for staff attitude?",
+    "gold_answer": "No. The difference in negative sentiment rates between CompareHive (10.7%) and Tallywise (15.3%) is not statistically significant (p = 0.315).",
+    "agent_answer": "There is no statistically significant difference in negative sentiment rates for staff attitude between CompareHive and Tallywise (p=0.315). CompareHive has a negative sentiment rate of 10.7% (11 mentions out of 103) for staff attitude, while Tallywise has a negative sentiment rate of 15.3% (18 mentions out of 118). The difference is 4.6 percentage points."
+  },
+  {
+    "task_id": "T5-E2",
+    "question": "Do Trippa and Roamly have significantly different negative sentiment rates for general satisfaction?",
+    "gold_answer": "Yes. The negative sentiment rates are statistically significantly different between Trippa (43.9%) and Roamly (22.1%) (p = 0.001).",
+    "agent_answer": "Yes, Trippa and Roamly have significantly different negative sentiment rates for general satisfaction. Trippa has a negative sentiment rate of 43.9% (54 out of 123 mentions), while Roamly has a negative sentiment rate of 22.1% (21 out of 95 mentions). The difference is 21.8 percentage points, and the z-test shows this difference is statistically significant (p = 0.0008)."
+  },
+  {
+    "task_id": "T5-H1",
+    "question": "Do Groceries and Price Comparison have significantly different negative sentiment rates for the app or website?",
+    "gold_answer": "No. The difference in negative sentiment rates between Groceries (48.1%) and Price Comparison (47.4%) is not statistically significant (p = 0.853).",
+    "agent_answer": "No answer. The aspect 'app or website' (or 'app' or 'website' individually) is not present in the dataset for the 'Groceries' industry, so a comparison cannot be made."
+  },
+  {
+    "task_id": "T5-H2",
+    "question": "Do Halden Savings and Kestrel Bank have significantly different negative sentiment rates for price and value for money?",
+    "gold_answer": "No answer. There is insufficient data to run a reliable two-proportion z-test.",
+    "agent_answer": "No answer. The aspects \"price\" and \"value for money\" are not found in the dataset. Please provide valid aspect names."
+  },
+  {
+    "task_id": "T5-H3",
+    "question": "Do Northpeak Trading and Quantly have significantly different negative sentiment rates for speed?",
+    "gold_answer": "No answer. There is insufficient data to run a reliable two-proportion z-test.",
+    "agent_answer": "No answer. The z-test for negative sentiment rates for 'speed' between Northpeak Trading and Quantly is not reliable because one of the four cells has fewer than 10 observations. Northpeak Trading has 12 negative mentions and 8 non-negative mentions for speed, while Quantly has 13 negative mentions and 12 non-negative mentions for speed."
+  },
+  {
+    "task_id": "T6-E1",
+    "question": "How do individual organisations in Banking compare to the industry average on the app or website? Give me each organisation's negative sentiment rate and ignore any organisations with less than 30 mentions about the app or website.",
+    "gold_answer": "The Banking industry has an average negative sentiment rate of 18.7% for reviews about the app or website. Among organisations with at least\n30 mentions, Halden Savings has the highest negative sentiment rate at 38.7% and is above the industry average, followed by Northeast Bank at 20.0%,\nalso slightly above average. Vanter Financial (12.8%) and Kestrel Bank (12.2%) are below the industry average.",
+    "agent_answer": "For the 'app-website' aspect in the Banking industry, the average negative sentiment rate is 18.7% (80 negative mentions out of 427 total mentions). The individual organisations compare as follows:\n- Northeast Bank: 20.0% (28 negative mentions out of 140 total mentions)\n- Kestrel Bank: 12.2% (17 negative mentions out of 139 total mentions)\n- Vanter Financial: 12.8% (11 negative mentions out of 86 total mentions)\n- Halden Savings: 38.7% (24 negative mentions out of 62 total mentions)"
+  },
+  {
+    "task_id": "T6-E2",
+    "question": "How do individual organisations in Travel Booking compare to the industry average on general satisfaction? Give me each organisation's negative sentiment rate and ignore any organisations with less than 30 mentions about general satisfaction.",
+    "gold_answer": "The Travel Booking industry has an average negative sentiment rate of 25.5% for general satisfaction reviews. Among organisations with at\nleast 30 mentions, Trippa has the highest negative sentiment rate at 43.9% and is above the industry average, while Roamly (22.1%), Journeo (19.6%)\nand Wayfare (8.9%) are all below average.",
+    "agent_answer": "The industry average negative sentiment rate for general satisfaction in Travel Booking is 25.5% (103 negative mentions out of 404 total mentions). Trippa has a negative sentiment rate of 43.9% (54 mentions), Roamly has 22.1% (21 mentions), Journeo has 19.6% (21 mentions), and Wayfare has 8.9% (7 mentions)."
+  },
+  {
+    "task_id": "T6-H1",
+    "question": "How do individual organisations in Fashion compare to the industry average on the app or website? Give me each organisation's negative sentiment rate and ignore any organisations with less than 30 mentions about the app or website.",
+    "gold_answer": "The Fashion industry has an average negative sentiment rate of 27.5% for reviews about the app or website. Among organisations with at least\n30 mentions, Marbrook has the highest negative sentiment rate at 37.3% and is above the industry average, followed by Northerly at 32.8%, also above\naverage. Vella & Co (18.6%) and Sable Row (18.2%) are below average.",
+    "agent_answer": "The average negative sentiment rate for the 'app-website' aspect in the Fashion industry is 27.5% (241 negative mentions out of 877 total mentions).\n\nHere's how individual organisations compare:\n*   **Marbrook**: 37.3% negative sentiment (103 negative mentions out of 276 total mentions).\n*   **Northerly**: 32.8% negative sentiment (63 negative mentions out of 192 total mentions).\n*   **Vella & Co**: 18.6% negative sentiment (29 negative mentions out of 156 total mentions).\n*   **Sable Row**: 18.2% negative sentiment (46 negative mentions out of 253 total mentions)."
+  },
+  {
+    "task_id": "T6-H2",
+    "question": "How do individual organisations in Consulting compare to the industry average on the app or website? Give me each organisation's negative sentiment rate and ignore any organisations with less than 30 mentions about the app or website.",
+    "gold_answer": "No answer. No organisation in Consulting has any reviews about the app or website, so no comparison can be made.",
+    "agent_answer": "No answer. The aspect 'app or website' does not have at least 30 mentions in the Consulting industry, so a reliable comparison cannot be made."
+  },
+  {
+    "task_id": "T6-H3",
+    "question": "How do individual organisations in Streaming compare to the industry average on general satisfaction? Give me each organisation's negative sentiment rate and ignore any organisations with less than 30 mentions about general satisfaction.",
+    "gold_answer": "No answer. No organisation in Streaming has any reviews about general satisfaction, so no comparison can be made.",
+    "agent_answer": "No answer. There are no mentions of 'general-satisfaction' in the 'Streaming' industry in the dataset."
+  },
+  {
+    "task_id": "T7-E1",
+    "question": "What is the biggest driver of dissatisfaction at Northeast Bank? Rank topics by negative sentiment rate and ignore any topics with less than 30 mentions.",
+    "gold_answer": "Email support is Northeast Bank's biggest driver of dissatisfaction. It has the highest negative sentiment rate at 87.5% among all topics with\nat least 30 mentions, ahead of discounts and promotions (82.5%) and staff attitude (77.5%).",
+    "agent_answer": "The biggest drivers of dissatisfaction at Northeast Bank, ranked by negative sentiment rate, are: email (87.5% negative rate, 35 mentions), discounts and promotions (82.5% negative rate, 33 mentions), and attitude of staff (77.5% negative rate, 31 mentions)."
+  },
+  {
+    "task_id": "T7-E2",
+    "question": "What is the biggest driver of dissatisfaction at Wayfare? Rank topics by negative sentiment rate and ignore any topics with less than 30 mentions.",
+    "gold_answer": "Account access is Wayfare's biggest driver of dissatisfaction. It has the highest negative sentiment rate at 92.5% among all topics with at\nleast 30 mentions, ahead of email support (85.0%) and phone support (67.5%).",
+    "agent_answer": "The biggest drivers of dissatisfaction at Wayfare, ranked by negative sentiment rate, are: 1. account-access: 92.5% negative sentiment (37 mentions out of 40) 2. email: 85.0% negative sentiment (34 mentions out of 40) 3. phone: 67.5% negative sentiment (27 mentions out of 40)"
+  },
+  {
+    "task_id": "T7-H1",
+    "question": "What is the biggest driver of dissatisfaction at Sable Row? Rank topics by negative sentiment rate and ignore any topics with less than 30 mentions.",
+    "gold_answer": "Staff attitude is Sable Row's biggest driver of dissatisfaction. It has the highest negative sentiment rate at 78.6% among all topics with at\nleast 30 mentions, ahead of general satisfaction (30.8%) and speed (30.0%).",
+    "agent_answer": "The biggest driver of dissatisfaction at Sable Row is 'attitude-of-staff', with a negative sentiment rate of 78.6% (44 negative mentions out of 56 total mentions)."
+  },
+  {
+    "task_id": "T7-H2",
+    "question": "What is the biggest driver of dissatisfaction at Investa? Rank topics by negative sentiment rate and ignore any topics with less than 30 mentions.",
+    "gold_answer": "Phone support is Investa's biggest driver of dissatisfaction. It has the highest negative sentiment rate at 52.5% among all topics with at\nleast 30 mentions, ahead of price and value for money (41.2%) and staff attitude (31.5%).",
+    "agent_answer": "The biggest driver of dissatisfaction at Investa is 'phone', with a negative sentiment rate of 52.5% (21 negative mentions out of 40 total mentions)."
+  },
+  {
+    "task_id": "T7-H3",
+    "question": "What is the biggest driver of dissatisfaction at Pinecast? Rank topics by negative sentiment rate and ignore any topics with less than 30 mentions.",
+    "gold_answer": "No answer. All topics have insufficient reviews to claim that any of them drives dissatisfaction.",
+    "agent_answer": "No answer. Pinecast has only 28 mentions, which is below the reliable reporting threshold of 30 mentions."
+  },
+  {
+    "task_id": "T8-E1",
+    "question": "Which 2 issues should Wayfare address first? Rank aspects using this formula: priority score = aspect prevalence x aspect negative rate. Ignore any aspects with less than 30 negative reviews.",
+    "gold_answer": "Wayfare should improve the app or website first (priority score: 0.1273), followed by account access (priority score: 0.0575).",
+    "agent_answer": "The two issues Wayfare should address first are app-website and account-access. App-website has a priority score of 0.1273, with 82 negative mentions out of 159 total mentions (51.6% negative rate). Account-access has a priority score of 0.0575, with 37 negative mentions out of 40 total mentions (92.5% negative rate)."
+  },
+  {
+    "task_id": "T8-E2",
+    "question": "Which 2 issues should Larkmead Market address first? Rank aspects using this formula: priority score = aspect prevalence x aspect negative rate. Ignore any aspects with less than 30 negative reviews.",
+    "gold_answer": "Larkmead Market should improve the app or website first (priority score: 0.1373), followed by ease of use (priority score: 0.1196).",
+    "agent_answer": "The two issues Larkmead Market should address first are app-website and ease-of-use. App-website has a priority score of 0.137 (124 negative mentions out of 259 total mentions, with a negative rate of 47.9%). Ease-of-use has a priority score of 0.120 (108 negative mentions out of 175 total mentions, with a negative rate of 61.7%)."
+  },
+  {
+    "task_id": "T8-H1",
+    "question": "Which 2 issues should Vella & Co address first? Rank aspects using this formula: priority score = aspect prevalence x aspect negative rate. Ignore any aspects with less than 30 negative reviews.",
+    "gold_answer": "Vella & Co should improve speed first (priority score: 0.0566), followed by phone support (priority score: 0.0412).",
+    "agent_answer": "Vella & Co should address 'speed' and 'phone' first. 'Speed' has a priority score of 0.057 (44 negative mentions out of 150 total mentions) and 'phone' has a priority score of 0.041 (32 negative mentions out of 40 total mentions)."
+  },
+  {
+    "task_id": "T8-H2",
+    "question": "Which 2 issues should CompareHive address first? Rank aspects using this formula: priority score = aspect prevalence x aspect negative rate. Ignore any aspects with less than 30 negative reviews.",
+    "gold_answer": "CompareHive should improve the app or website first (priority score: 0.0591). The topic with the second highest priority score is general satisfaction, which is not actionable.",
+    "agent_answer": "The top issue CompareHive should address first is 'app-website', with a priority score of 0.059. This aspect has 46 negative mentions out of 80 total mentions, resulting in a negative rate of 57.5%. There are no other actionable aspects with at least 30 negative reviews to report."
+  },
+  {
+    "task_id": "T8-H3",
+    "question": "Which 2 issues should Kerbside address first? Rank aspects using this formula: priority score = aspect prevalence x aspect negative rate. Ignore any aspects with less than 30 negative reviews.",
+    "gold_answer": "Kerbside should improve the app or website first (priority score: 0.1290), followed by email support (priority score: 0.1250).",
+    "agent_answer": "The two issues Kerbside should address first are app-website and email. App-website has a priority score of 0.129, with 32 negative mentions out of 61 total mentions (52.5% negative rate). Email has a priority score of 0.125, with 31 negative mentions out of 40 total mentions (77.5% negative rate)."
+  },
+  {
+    "task_id": "T9-E1",
+    "question": "Why does Halden Savings have a higher complaint rate than Kestrel Bank? What should Halden Savings improve first?",
+    "gold_answer": "The higher complaint rate is driven by discounts and promotions, so Halden Savings should improve that first. Reviews about discounts and\npromotions have a negative sentiment rate of 82.5%, compared with 60.0% at Kestrel Bank - the largest gap between the two banks at 22.5 percentage\npoints.",
+    "agent_answer": "Halden Savings has a significantly higher complaint rate than Kestrel Bank. Halden Savings has a negative sentiment rate of 49.7% (284 complaints out of 571 reviews), which is 10.8 percentage points higher than Kestrel Bank's rate of 38.9% (276 complaints out of 709 reviews). This difference is statistically significant. To improve, Halden Savings should first address 'attitude-of-staff', which has 35 negative mentions out of 40 total mentions, resulting in a negative rate of 87.5%."
+  },
+  {
+    "task_id": "T9-E2",
+    "question": "Why does CompareHive have a higher complaint rate than PricePilot? What should CompareHive improve first?",
+    "gold_answer": "The higher complaint rate is driven by the app or website, so CompareHive should improve that first. Reviews about the app or website have a\nnegative sentiment rate of 74.0%, compared with 34.2% at PricePilot - the largest gap between the two price comparison platforms at 39.8 percentage\npoints.",
+    "agent_answer": "CompareHive has a significantly higher complaint rate than PricePilot. CompareHive's negative sentiment rate is 33.0% (325 complaints out of 986 reviews), which is 12.4 percentage points higher than PricePilot's rate of 20.6% (191 complaints out of 927 reviews). This difference is statistically significant. \n\nTo improve, CompareHive should first focus on the following aspects:\n1. **App/Website**: This is the top priority with 74 complaints out of 100 mentions, resulting in a negative rate of 74.0%.\n2. **Account Access**: This is the second priority with 35 complaints out of 40 mentions, resulting in a negative rate of 87.5%.\n3. **Discounts/Promotions**: This is the third priority with 29 complaints out of 40 mentions, resulting in a negative rate of 72.5%."
+  },
+  {
+    "task_id": "T9-H1",
+    "question": "Why does Sable Row have a higher complaint rate than Northerly? What should Sable Row improve first?",
+    "gold_answer": "The higher complaint rate is driven by staff attitude, so Sable Row should improve that first. Reviews about staff attitude have a negative\nsentiment rate of 78.6%, compared with 54.8% at Northerly - the largest actionable gap between the two fashion brands at 23.8 percentage points.\nGeneral satisfaction has the largest gap overall, but it is not actionable.",
+    "agent_answer": "Sable Row has a significantly higher complaint rate than Northerly, with 30.2% (279 complaints out of 925 reviews) compared to Northerly's 19.8% (173 complaints out of 876 reviews). This is a difference of 10.4 percentage points. Sable Row should first improve its app or website, which has 46 negative mentions out of 253 total mentions. The next area for improvement is the attitude of staff, with 44 negative mentions out of 56 total mentions, followed by speed, with 30 negative mentions out of 100 total mentions."
+  },
+  {
+    "task_id": "T9-H2",
+    "question": "Why does Larkmead Market have a higher complaint rate than Oakpan Grocers? What should Larkmead Market improve first?",
+    "gold_answer": "The higher complaint rate is driven by speed, so Larkmead Market should improve that first. Reviews about speed have a negative sentiment rate\nof 56.9%, compared with 23.7% at Oakpan Grocers - the largest gap between the two grocery stores at 33.2 percentage points.",
+    "agent_answer": "Larkmead Market has a significantly higher complaint rate than Oakpan Grocers. Larkmead Market has a negative sentiment rate of 44.5% (293 complaints out of 658 reviews), which is 13.3 percentage points higher than Oakpan Grocers' rate of 31.2% (124 complaints out of 397 reviews). This difference is statistically significant. Larkmead Market should first improve 'ease-of-use', which has the highest priority score. It accounts for 170 mentions (25.8% prevalence) and has a negative sentiment rate of 57.6% (98 complaints). The next area to improve is 'app-website', with 189 mentions (28.7% prevalence) and a negative sentiment rate of 46.0% (87 complaints)."
+  },
+  {
+    "task_id": "T9-H3",
+    "question": "Why does Halden Savings have a higher complaint rate than Northeast Bank? What should Halden Savings improve first?",
+    "gold_answer": "No answer. The data does not explain what drives the higher complaint rate. The only topic where Halden Savings has a higher negative rate\nthan Northeast Bank is general satisfaction, but it is not actionable. Halden Savings should collect more customer feedback to understand what is\ndriving dissatisfaction.",
+    "agent_answer": "Halden Savings has a significantly higher complaint rate than Northeast Bank. Halden Savings has a negative sentiment rate of 37.2% (125 mentions out of 336 total), while Northeast Bank has a negative sentiment rate of 19.9% (83 mentions out of 417 total). This represents a statistically significant difference of 17.3 percentage points.\n\nTo improve, Halden Savings should first focus on 'ease-of-use'. This aspect has 28 negative mentions out of 107 total mentions, resulting in a negative rate of 26.2%. While 'attitude-of-staff' (21 negative mentions out of 22 total) and 'account-access' (16 negative mentions out of 27 total) show higher negative rates, they are based on fewer than 30 mentions and therefore cannot be reliably reported as top improvement areas."
+  }
+];
+
+/* ---------------- state ---------------- */
+// One saved session PER NAME, so several people can use the same browser
+// without overwriting each other. Key: cfa_annot_v2:<normalised name>
+const PREFIX = "cfa_annot_v2:";
+const LAST = "cfa_annot_v2_last";
+let S = null;
+
+function slug(name){ return String(name).trim().toLowerCase().replace(/\s+/g," "); }
+function keyFor(name){ return PREFIX + slug(name); }
+
+function loadFor(name){
+  if (!name || slug(name).length < 2) return null;
+  try{
+    const raw = localStorage.getItem(keyFor(name));
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    return (s && s.rows && s.order) ? s : null;
+  }catch(e){ return null; }
+}
+function save(){
+  if (!S || !S.tagger) return;
+  try{
+    localStorage.setItem(keyFor(S.tagger), JSON.stringify(S));
+    localStorage.setItem(LAST, S.tagger);
+  }catch(e){}
+}
+function clearFor(name){ try{ localStorage.removeItem(keyFor(name)); }catch(e){} }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+const $ = id => document.getElementById(id);
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); $(id).classList.add("active"); window.scrollTo(0,0); }
+
+/* ---------------- ordering ---------------- */
+// Split by difficulty (E/H from task_id), shuffle within each block, then
+// interleave proportionally so effort is evenly spread across the session.
+function buildOrder(){
+  const diff = id => (/-([EH])/.exec(id) || [,"E"])[1];
+  const E = shuffle(TASKS.filter(t => diff(t.task_id) === "E").map(t => t.task_id));
+  const H = shuffle(TASKS.filter(t => diff(t.task_id) === "H").map(t => t.task_id));
+  const n = E.length + H.length, out = [];
+  let ei = 0, hi = 0;
+  for (let k = 1; k <= n; k++){
+    const wantE = Math.round(E.length * k / n);
+    if (ei < E.length && ei < wantE) out.push(E[ei++]);
+    else if (hi < H.length) out.push(H[hi++]);
+    else out.push(E[ei++]);
+  }
+  return out;
+}
+
+/* ---------------- start screen ---------------- */
+// Look up the saved session for whatever name is currently typed.
+function refreshStart(){
+  const name = $("tagger").value.trim();
+  const saved = loadFor(name);
+  $("startBtn").disabled = name.length < 2;
+
+  if (saved && saved.i >= saved.order.length){
+    clearFor(name);
+    $("startBtn").textContent = "Start grading";
+    $("startHint").textContent = "You've already finished all " + saved.order.length + " tasks. Starting again would create a duplicate set — check with the researcher first.";
+    $("startHint").className = "hint block";
+    return;
+  }
+  $("startHint").className = "hint";
+
+  if (saved){
+    $("startBtn").textContent = "Resume grading";
+    $("startHint").textContent = "Welcome back, " + saved.tagger + ". You've completed " +
+      saved.i + " of " + saved.order.length + " tasks.";
+  } else {
+    $("startBtn").textContent = "Start grading";
+    $("startHint").textContent = name.length < 2 ? "" : "New session for " + name + ".";
+  }
+}
+
+// Prefill the last name used on this browser, so the common case is one click.
+try{
+  const last = localStorage.getItem(LAST);
+  if (last && loadFor(last)) $("tagger").value = last;
+}catch(e){}
+refreshStart();
+
+$("tagger").addEventListener("input", refreshStart);
+
+// ONE handler. Resumes if a session exists for THIS name, otherwise starts fresh.
+$("startBtn").addEventListener("click", () => {
+  const name = $("tagger").value.trim();
+  if (name.length < 2) return;
+
+  const saved = loadFor(name);
+  if (saved && saved.i < saved.order.length){
+    S = saved;
+    S.segmentStart = Date.now();          // new sitting begins
+    S.sittings = (S.sittings || 1) + 1;
+  } else {
+    S = {
+      session_id: uid(),
+      tagger: name,
+      order: buildOrder(),
+      i: 0,
+      activeMs: 0,
+      segmentStart: Date.now(),
+      taskStart: Date.now(),
+      sittings: 1,
+      rows: [],
+      queue: []
+    };
+  }
+  $("pTot").textContent = S.order.length;
+  save(); renderTask(); show("s-task"); startClock();
+});
+
+/* ---------------- score buttons ---------------- */
+const LABELS = {5:"complete",4:"minor gap",3:"key gap",2:"inaccurate",1:"barely relevant",0:"no answer"};
+let picked = null;
+const scoreWrap = $("scores");
+[5,4,3,2,1,0].forEach(n => {
+  const b = document.createElement("button");
+  b.className = "sc"; b.type = "button"; b.dataset.score = n;
+  b.setAttribute("aria-pressed","false");
+  b.innerHTML = n + "<small>" + LABELS[n] + "</small>";
+  b.onclick = () => {
+    picked = n;
+    [...scoreWrap.children].forEach(c => c.setAttribute("aria-pressed", c.dataset.score == n));
+    validate();
+  };
+  scoreWrap.appendChild(b);
+});
+$("comments").addEventListener("input", validate);
+
+function validate(){
+  const ok = picked !== null && $("comments").value.trim().length >= 10;
+  if (picked !== null) $("scores").classList.remove("missing");
+  if ($("comments").value.trim().length >= 10) $("comments").classList.remove("missing");
+  $("nextBtn").disabled = !ok;
+  $("taskHint").className = "hint";
+  if (picked === null) $("taskHint").textContent = "Add a score and a comment to continue.";
+  else if (!ok) $("taskHint").textContent = "Add a short comment on what decided the score.";
+  else $("taskHint").textContent = "You can't return to this task after saving.";
+}
+
+/* ---------------- render ---------------- */
+function renderTask(){
+  const id = S.order[S.i];
+  const t = TASKS.find(x => x.task_id === id);
+  $("taskId").textContent = "Task " + (S.i+1);
+  $("question").textContent = t.question;
+  $("gold").textContent = t.gold_answer;
+  $("agent").textContent = t.agent_answer;
+  $("pNow").textContent = S.i + 1;
+  $("comments").value = ""; $("flag").value = "";
+  picked = null;
+  [...scoreWrap.children].forEach(c => c.setAttribute("aria-pressed","false"));
+  $("scores").classList.remove("missing"); $("comments").classList.remove("missing");
+  document.querySelector("details.rubric").open = (S.i === 0);
+  validate();
+  $("pTot").textContent = S.order.length;
+  $("pfill").style.width = (100 * S.i / S.order.length) + "%";
+  S.taskStart = Date.now(); save();
+}
+
+/* ---------------- clock ---------------- */
+let clockTimer = null;
+function elapsedMs(){ return (S.activeMs || 0) + (Date.now() - S.segmentStart); }
+function startClock(){
+  if (clockTimer) return;
+  clockTimer = setInterval(() => {
+    if (!S || !S.segmentStart) return;
+    const s = Math.floor(elapsedMs()/1000);
+    $("clock").textContent = String(Math.floor(s/60)).padStart(2,"0") + ":" + String(s%60).padStart(2,"0");
+  }, 1000);
+}
+// bank the current sitting's time whenever the tab is hidden or closed
+function bankTime(){
+  if (!S || !S.segmentStart) return;
+  S.activeMs = (S.activeMs || 0) + (Date.now() - S.segmentStart);
+  S.segmentStart = Date.now();
+  save();
+}
+document.addEventListener("visibilitychange", () => { if (document.hidden) bankTime(); });
+window.addEventListener("pagehide", bankTime);
+
+/* ---------------- next ---------------- */
+$("nextBtn").addEventListener("click", () => {
+  // hard guard: never save a task without a score and a comment
+  const missingScore = picked === null;
+  const missingComment = $("comments").value.trim().length < 10;
+  $("scores").classList.toggle("missing", missingScore);
+  $("comments").classList.toggle("missing", missingComment);
+  if (missingScore || missingComment){
+    $("taskHint").className = "hint block";
+    $("taskHint").textContent = missingScore && missingComment
+      ? "Choose a score and write a comment before saving."
+      : missingScore ? "Choose a score before saving."
+      : "Write a comment on what decided the score before saving.";
+    ($(missingScore ? "scores" : "comments")).scrollIntoView({block:"center", behavior:"smooth"});
+    return;
+  }
+  const id = S.order[S.i];
+  const row = {
+    tagger_name: S.tagger,
+    task_id: id,
+    score: picked,
+    comments: $("comments").value.trim(),
+    flag_comment: $("flag").value.trim(),
+    difficulty: (/-([EH])/.exec(id) || [,""])[1],
+    seconds_on_task: Math.round((Date.now() - S.taskStart)/1000),
+    seconds_session_elapsed: Math.round(elapsedMs()/1000),
+    sitting: S.sittings || 1,
+    submitted_at: new Date().toISOString(),
+    session_id: S.session_id,
+    presentation_order: S.i + 1
+  };
+  S.rows.push(row); S.i++; save();
+  send(row);
+
+  if (S.i < S.order.length){ renderTask(); }
+  else {
+    bankTime();
+    clearFor(S.tagger);
+    const mins = Math.round(elapsedMs()/600)/100;
+    $("summary").textContent = S.order.length + " tasks · " + mins + " minutes of active time · " + S.tagger;
+    show("s-done");
+    flushQueue();
+  }
+});
+
+/* ---------------- submission ---------------- */
+function send(row){
+  if (!ENDPOINT || ENDPOINT.indexOf("PASTE_") === 0){ note("Local mode — no endpoint set."); return; }
+  fetch(ENDPOINT, {
+    method: "POST",
+    headers: {"Content-Type": "text/plain;charset=utf-8"},
+    body: JSON.stringify(row)
+  })
+  .then(r => { if (!r.ok) throw new Error(r.status); note("Saved."); })
+  .catch(() => {
+    // retry without reading the response, then queue if that also fails
+    fetch(ENDPOINT, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify(row)})
+      .then(() => note("Saved."))
+      .catch(() => { S.queue.push(row); save(); note("Offline — answers held on this device."); });
+  });
+}
+function flushQueue(){
+  if (!S.queue.length){ return; }
+  $("doneMsg").textContent = "Some answers couldn't be sent. Please download the CSV below and send it to the researcher.";
+  $("doneMsg").className = "hint block";
+  S.queue.forEach(send);
+}
+function note(msg){ $("netStatus").textContent = msg; }
+
+/* ---------------- CSV fallback ---------------- */
+$("csvBtn").addEventListener("click", () => {
+  const cols = ["tagger_name","task_id","difficulty","score","comments","flag_comment","seconds_on_task","seconds_session_elapsed","sitting","submitted_at","session_id","presentation_order"];
+  const esc = v => '"' + String(v == null ? "" : v).replace(/"/g,'""') + '"';
+  const csv = [cols.join(",")].concat(S.rows.map(r => cols.map(c => esc(r[c])).join(","))).join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv"}));
+  a.download = "annotation_" + S.tagger.replace(/\W+/g,"_") + ".csv";
+  a.click();
+});
+
+
+</script>
+</body>
+</html>

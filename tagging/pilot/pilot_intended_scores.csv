@@ -1,0 +1,47 @@
+﻿task_id,question,gold_answer,agent_answer,intended_score,example comments
+DIAG-05,What are the top 2 drivers of dissatisfaction for TradeA?,"TradeA's two biggest drivers of dissatisfaction are competitor and the app or website.
+  • Competitor — 60% negative (n=45)
+  • App or website — 57% negative (n=52)
+  Caveat: the two rates are close (3 points apart, not a statistically significant difference, p=0.74), so treat them as joint top drivers rather than a clear first and second.","Two things stand out for TradeA, and they're effectively level: competitor draws 60% negative feedback across 45 reviews, while the app or website sits at 57% across 52. A 3-point gap isn't meaningful (p=0.74) — I'd call them joint top drivers rather than rank one above the other.",5,"Correct — verdict, both figures, and the ""too close to rank"" catch all present."
+DIAG-06,What are TradeA's top 2 priority issues based on dissatisfaction impact?,"TradeA's top two priority issues are the app or website and competitor.
+  • App or website — priority score 1
+  • Competitor — priority score 1
+  Caveat: the two are tied on priority score, so either order is acceptable; neither can be ranked above the other on this evidence.","TradeA's priority list comes out as: 1) app or website, 2) competitor — both scoring 1 on priority impact.",3,Catch omitted: presents a ranked order without noting the two are tied and either order is acceptable. Figures right; the caveat that makes the ranking meaningful is missing.
+DIAG-07,What are the top 2 drivers of dissatisfaction for ConsultA?,"Competitor is ConsultA's clear top driver of dissatisfaction; the app or website is a distant second.
+  • Competitor — 63% negative (n=38)
+  • App or website — 21% negative (n=14)
+  Caveat: the app or website is based on only 14 reviews, too few to be reliable, so it should not be treated as a comparable driver.","Competitor is the clear problem for ConsultA at 63% negative, with the app or website well behind on 21%. Worth flagging that the app or website number comes from only about a dozen reviews (n=12), so it's not solid enough to treat as a real second driver.",4,"Minor figure error: sample size given as 12 rather than 14. Verdict, rates and the small-sample catch are all correct — the slip doesn't change the conclusion."
+DIAG-08,What are ConsultA's top 2 priority issues based on dissatisfaction impact?,"Competitor is ConsultA's only genuine priority issue.
+  • Competitor — priority score 2
+  • App or website — priority score 0
+  Caveat: the app or website ranks second but scores zero (21% negative on just 14 reviews), so it is not a real priority despite appearing in the top two.","ConsultA has a couple of areas showing up in the feedback that are worth keeping an eye on. Neither is dramatic, but they'd benefit from some attention over the next quarter.",1,"Vague: names no issue, gives no priority scores, commits to nothing checkable — though it stays on-topic."
+PRES-01,How do TradeA's complaint drivers compare against the Trading industry average?,"The app or website is TradeA's real weakness; competitor is actually a relative strength.
+  • App or website — 57% vs the Trading average of 40%: worse than the industry
+  • Competitor — 60% vs the Trading average of 79%: better than the industry
+  Caveat: the app or website gap is statistically significant (p=0.02); the competitor gap is also significant (p=0.01), meaning TradeA is genuinely ahead of the industry there.","Against the Trading benchmark, TradeA splits in two directions. The app or website is its genuine weak spot at 57% versus the industry's 40%, a significant gap (p=0.02). Competitor runs the other way — 60% against an industry average of 79%, and that lead is significant too (p=0.01). So one real weakness, one real strength.",5,"Correct — both directions right, both p-values present."
+PRES-02,"What are TradeA's key dissatisfaction drivers, and what are the recommended priority fixes?","TradeA should fix the app or website and competitor, with the app or website the safer first move.
+  • Feedback overall: 37% positive, 58% negative, 5% neutral (n=120)
+  • Competitor — 60% negative (n=45)
+  • App or website — 57% negative (n=52)
+  Caveat: the two are tied on priority score (1 each), so the tie is broken by the industry comparison — the app or website is significantly worse than the Trading average (57% vs 40%, p=0.02), while competitor is better than average.",For TradeA the biggest opportunity is customer communication — more proactive outreach and a stronger presence on social channels would lift sentiment over time.,0,"Off-topic: ignores both drivers and the priority scores, recommending something the gold doesn't support."
+PRES-03,"Provide a comprehensive CX report for TradeA: satisfaction, primary complaints, key drivers, and industry comparison.","Overall verdict: TradeA is majority negative, and its app or website is the issue to fix first.
+  • Satisfaction: 37% positive, 58% negative, 5% neutral (n=120)
+  • Primary complaints: the app or website and competitor
+  • Key drivers: competitor 60% negative (n=45); app or website 57% negative (n=52)
+  • Vs the Trading industry: app or website worse than average (57% vs 40%, significant, p=0.02); competitor better than average (60% vs 79%, significant, p=0.01)
+  Caveat: the two drivers are tied on priority score (1 each), so the industry comparison is what makes the app or website the first fix.","TradeA quarterly view. The account is majority negative — 37% positive against 58% negative, 5% neutral, over 120 reviews. Complaints cluster around the app or website and competitor. Driver rates: competitor 60% negative (n=45), app or website 47% (n=52). Versus the Trading industry, the app or website is significantly worse (47% vs 40%, p=0.02) while competitor is significantly better (60% vs 79%, p=0.01). Priority scores are tied at 1, so the industry comparison makes the app or website the first fix.",3,"Key figure wrong: app/website negative rate given as 47%, not 57% — and repeated in the comparison. Verdict and structure are otherwise right."
+PRES-04,How do ConsultA's complaint drivers compare against the Consulting industry average?,"Competitor is ConsultA's weaker area; the app or website is better than the industry.
+  • Competitor — 63% vs the Consulting average of 58%: worse than the industry
+  • App or website — 21% vs the Consulting average of 31%: better than the industry
+  Caveat: neither gap is statistically significant (p=0.42 and p=0.38), so ConsultA is broadly in line with the industry on both.","ConsultA is a little worse than its industry on competitor (63% vs 58%) and a little better on the app or website (21% vs 31%). Neither gap is big enough to be statistically meaningful, so it's broadly in line with the Consulting average on both.",4,Missing detail: the catch is stated in words but both p-values are dropped. Directions and rates correct.
+PRES-05,"What are ConsultA's key dissatisfaction drivers, and what are the recommended priority fixes?","ConsultA should prioritise competitor; no other issue warrants action yet.
+  • Feedback overall: 53% positive, 43% negative, 3% neutral (n=95)
+  • Competitor — 63% negative (n=38), priority score 2
+  • App or website — 21% negative (n=14), priority score 0
+  Caveat: the app or website is based on only 14 reviews and scores zero on priority, so it should not be actioned. ConsultA's competitor rate is not significantly worse than the Consulting average (63% vs 58%, p=0.42).","ConsultA's feedback is 53% positive and 43% negative. The area to go after first is the app or website — at 21% negative it's clearly dragging on the experience, and fixing it should lift satisfaction.",2,"Wrong verdict: recommends the issue the gold explicitly rules out (priority score 0, n=14), and ignores competitor entirely."
+PRES-06,"Provide a comprehensive CX report for ConsultA: satisfaction, primary complaints, key drivers, and industry comparison.","Overall verdict: ConsultA is majority positive, with competitor the single issue worth acting on.
+  • Satisfaction: 53% positive, 43% negative, 3% neutral (n=95)
+  • Primary complaints: competitor and the app or website
+  • Key drivers: competitor 63% negative (n=38); app or website 21% negative (n=14)
+  • Vs the Consulting industry: competitor slightly worse than average (63% vs 58%); app or website better than average (21% vs 31%)
+  Caveat: neither industry gap is statistically significant (p=0.42 and p=0.38), and the app or website rests on only 14 reviews, so competitor (priority score 2) is the only justified action.","ConsultA — CX summary. Sentiment: 53% positive, 43% negative, 3% neutral (n=95). Main complaint areas: competitor and the app or website. Driver rates: competitor 63% negative (n=38); app or website 21% (n=14). Benchmarking: competitor sits slightly above the Consulting average of 58%, app or website below the 31% average — but neither difference reaches significance (p=0.42, p=0.38), and the app or website figure rests on 14 reviews. Only competitor (priority 2) justifies action.",5,"Correct — all four report sections, plus both catches (non-significance and small sample)."
